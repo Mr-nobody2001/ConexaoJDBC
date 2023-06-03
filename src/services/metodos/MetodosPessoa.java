@@ -122,6 +122,7 @@ public abstract class MetodosPessoa {
     private static Profissao pesquisarProfissao() {
         // Testado
         List<Profissao> list;
+        ServicosProfissao servicosProfissao = new ServicosProfissao();
         ProfissaoVO profissaoVO;
         Profissao profissao;
 
@@ -135,7 +136,7 @@ public abstract class MetodosPessoa {
             profissaoEncontrada = false;
 
             System.out.print("\n" + "Insira o id da profissão" + "\n");
-            MetodoProfissao.listarProfissaoInterna();
+            servicosProfissao.listarProfissaoResumida();
             System.out.print("\n" + "Id: ");
             idProfissao = Tratatamento.tratarErroTipoInputNumericoLong();
             list = profissaoVO.obterProfissaoId(idProfissao);

@@ -1,6 +1,7 @@
 package dao.entitiesVO;
 
 import entities.Profissao;
+import entities.exceptions.SqlUpdateException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,15 +27,13 @@ public class ProfissaoVO extends BaseDAO {
         }
     }
 
-    public int alterarDB(long idProfissao, int opcaoAlterar, String alteracao) {
+    public Integer alterarDB(long idProfissao, int opcaoAlterar, String alteracao) {
         // Testado
         connection = this.getConnection();
 
-        int retorno;
+        int retorno = -1;
 
         String nomeColuna;
-
-        retorno = 2;
 
         switch (opcaoAlterar) {
             case 1 -> nomeColuna = "nome";

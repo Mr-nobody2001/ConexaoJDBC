@@ -1,6 +1,6 @@
 package application;
 
-import services.metodos.MenuPrincipal;
+import services.metodos.ServicosMenu;
 import services.metodos.Tratatamento;
 
 public class Program {
@@ -9,7 +9,7 @@ public class Program {
         int opcao;
 
         do {
-            MenuPrincipal.mostrar();
+            ServicosMenu.mostrar();
 
             System.out.print("\n" + "Opção: ");
             opcao = Tratatamento.tratarErroTipoInputNumericoInteiro();
@@ -20,7 +20,7 @@ public class Program {
                 opcao = Tratatamento.tratarErroTipoInputNumericoInteiro();
             }
 
-            MenuPrincipal.executar(opcao);
+            ServicosMenu.executar(opcao);
 
         } while (opcao != 9);
     }
