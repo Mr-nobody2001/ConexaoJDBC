@@ -10,50 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProfissaoVO extends BaseDAO {
-    private long id;
-    private String nome;
-    private String descricao;
-
-    public ProfissaoVO() {
-    }
-
-    public ProfissaoVO(long id, String nome, String descricao) {
-        this.id = id;
-        this.nome = nome;
-        this.descricao = descricao;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    @Override
-    public String toString() {
-        return "Id = " + this.id + "\n" +
-                "Nome = " + this.nome + "\n" +
-                "Descrição = " + this.descricao;
-    }
-
     public void inserirBD(Profissao profissao) {
         // Testada
         connection = this.getConnection();
@@ -121,11 +77,11 @@ public class ProfissaoVO extends BaseDAO {
         return retorno;
     }
 
-    public List<ProfissaoVO> obterProfissaoNome(String nomeProfissao) {
+    public List<Profissao> obterProfissaoNome(String nomeProfissao) {
         // Testado
         connection = this.getConnection();
 
-        List<ProfissaoVO> list = new ArrayList<>();
+        List<Profissao> list = new ArrayList<>();
 
         ResultSet resultSet;
 
@@ -138,11 +94,11 @@ public class ProfissaoVO extends BaseDAO {
             preparedStatement.setString(1, nomePesquisa.toUpperCase());
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                ProfissaoVO profissaoVO = new ProfissaoVO();
-                profissaoVO.setId(resultSet.getInt("id"));
-                profissaoVO.setNome(resultSet.getString("nome"));
-                profissaoVO.setDescricao(resultSet.getString("descricao"));
-                list.add(profissaoVO);
+                Profissao profissao = new Profissao();
+                profissao.setId(resultSet.getInt("id"));
+                profissao.setNome(resultSet.getString("nome"));
+                profissao.setDescricao(resultSet.getString("descricao"));
+                list.add(profissao);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -151,15 +107,15 @@ public class ProfissaoVO extends BaseDAO {
         return list;
     }
 
-    public List<ProfissaoVO> obterProfissaoId(long idProfissao) {
+    public List<Profissao> obterProfissaoId(long idProfissao) {
         // Testado
         connection = this.getConnection();
 
-        List<ProfissaoVO> list = new ArrayList<>();
+        List<Profissao> list = new ArrayList<>();
 
         ResultSet resultSet;
 
-        ProfissaoVO profissaoVO = new ProfissaoVO();
+        Profissao profissao = new Profissao();
 
         String sql = "SELECT * FROM profissao WHERE id = ?";
 
@@ -168,10 +124,10 @@ public class ProfissaoVO extends BaseDAO {
             preparedStatement.setLong(1, idProfissao);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                profissaoVO.setId(resultSet.getInt("id"));
-                profissaoVO.setNome(resultSet.getString("nome"));
-                profissaoVO.setDescricao(resultSet.getString("descricao"));
-                list.add(profissaoVO);
+                profissao.setId(resultSet.getInt("id"));
+                profissao.setNome(resultSet.getString("nome"));
+                profissao.setDescricao(resultSet.getString("descricao"));
+                list.add(profissao);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -180,11 +136,11 @@ public class ProfissaoVO extends BaseDAO {
         return list;
     }
 
-    public List<ProfissaoVO> listarDB() {
+    public List<Profissao> listarDB() {
         // Testado
         connection = this.getConnection();
 
-        List<ProfissaoVO> list;
+        List<Profissao> list;
 
         ResultSet resultSet;
 
@@ -196,7 +152,7 @@ public class ProfissaoVO extends BaseDAO {
             Statement statement = connection.createStatement();
             resultSet = statement.executeQuery(sql);
             while (resultSet.next()) {
-                ProfissaoVO profissaoDBTemporaria = new ProfissaoVO();
+                Profissao profissaoDBTemporaria = new Profissao();
                 profissaoDBTemporaria.setId(resultSet.getInt("id"));
                 profissaoDBTemporaria.setNome(resultSet.getString("nome"));
                 profissaoDBTemporaria.setDescricao(resultSet.getString("descricao"));

@@ -89,11 +89,9 @@ public abstract class MetodoProfissao {
 
     private static long pesquisarProfissao() {
         // Testado
-        List<ProfissaoVO> list;
+        List<Profissao> list;
 
-        Scanner scanner;
-
-        scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
 
         long idProfissao;
         String nomeProfissao;
@@ -117,7 +115,7 @@ public abstract class MetodoProfissao {
         System.out.println("\n" + "Profissões: ");
         System.out.println("------------------------------" + "\n");
 
-        for (ProfissaoVO temp : list) {
+        for (Profissao temp : list) {
             System.out.printf("Id:%d %s%n", temp.getId(), temp.getNome());
         }
 
@@ -169,26 +167,26 @@ public abstract class MetodoProfissao {
 
     public static void listarProfissao() {
         // Testado
-        List<ProfissaoVO> list;
+        List<Profissao> list;
 
         list = profissaoVO.listarDB();
 
         System.out.println("\n" + "Profissões: ");
         System.out.println("------------------------------" + "\n");
-        for (ProfissaoVO temp : list) {
+        for (Profissao temp : list) {
             System.out.printf("%s %s : %s%n%n", temp.getId(), temp.getNome(), temp.getDescricao());
         }
     }
 
     public static void listarProfissaoInterna() {
         // Testado
-        List<ProfissaoVO> list;
+        List<Profissao> list;
 
         list = profissaoVO.listarDB();
 
         System.out.println("\n" + "Profissões: ");
         System.out.println("------------------------------" + "\n");
-        for (ProfissaoVO temp : list) {
+        for (Profissao temp : list) {
             System.out.printf("Id:%s %s %n", temp.getId(), temp.getNome());
         }
     }

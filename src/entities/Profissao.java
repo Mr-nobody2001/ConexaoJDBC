@@ -1,6 +1,7 @@
 package entities;
 
 public class Profissao {
+    private Integer id;
     private String nome;
     private String descricao;
 
@@ -10,6 +11,14 @@ public class Profissao {
     public Profissao(String nome, String descricao) {
         this.nome = nome;
         this.descricao = descricao;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getNome() {
@@ -26,11 +35,5 @@ public class Profissao {
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
-    }
-
-    @Override
-    public String toString() {
-        return "Nome da Profissão = " + this.nome + ", " +
-                "Descrição = " + descricao;
     }
 }
