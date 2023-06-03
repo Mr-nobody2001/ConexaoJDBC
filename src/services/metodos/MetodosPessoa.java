@@ -17,29 +17,22 @@ public abstract class MetodosPessoa {
 
     public static Pessoa inserirPessoa() {
         // Testado
-        Object[] retorno;
-
         Pessoa pessoaRetorno;
 
-        retorno = criarObjetoPessoa();
+        pessoaRetorno = criarObjetoPessoa();
 
-        pessoaRetorno = (Pessoa) retorno[0];
-
-        pessoaVO.inserirBD(retorno);
+        pessoaVO.inserirBD(pessoaRetorno);
 
         return pessoaRetorno;
     }
 
-    private static Object[] criarObjetoPessoa() {
+    private static Pessoa criarObjetoPessoa() {
         // Testado
         Scanner scanner = new Scanner(System.in);
 
-        Object[] retorno;
-
-        ProfissaoVO profissaoVO;
+        Profissao profissao;
         Profissao profissaoPessoa;
 
-        long idProfissao;
         String nomePessoa;
         String[] numerosTelefone;
 
@@ -51,21 +44,17 @@ public abstract class MetodosPessoa {
             nomePessoa = scanner.next();
         }
 
-        profissaoVO = MetodosPessoa.pesquisarProfissao();
+        profissao = MetodosPessoa.pesquisarProfissao();
 
         profissaoPessoa = new Profissao();
 
-        idProfissao = profissaoVO.getId();
-        profissaoPessoa.setNome(profissaoVO.getNome());
-        profissaoPessoa.setDescricao(profissaoVO.getDescricao());
+        profissaoPessoa.setId(profissao.getId());
+        profissaoPessoa.setNome(profissao.getNome());
+        profissaoPessoa.setDescricao(profissao.getDescricao());
 
         numerosTelefone = MetodosPessoa.obterTelefones();
 
-        retorno = new Object[2];
-        retorno[0] = new Pessoa(nomePessoa, profissaoPessoa, numerosTelefone);
-        retorno[1] = idProfissao;
-
-        return retorno;
+        return new Pessoa(nomePessoa, profissaoPessoa, numerosTelefone);
     }
 
     private static String[] obterTelefones() {
@@ -107,13 +96,15 @@ public abstract class MetodosPessoa {
 
         numeroTelefone = scanner.next();
 
-        while (numeroTelefone.length() < 11) {
+        while (numeroTelefone.length() != 11) {
             System.out.print("Número de telefone inválido. Insira novamente: ");
             numeroTelefone = scanner.next();
         }
 
-        return "(" + numeroTelefone.substring(0, 2) + ")" + numeroTelefone.substring(2, 7) + "-" +
-                numeroTelefone.substring(7);
+        /*"(" + numeroTelefone.substring(0, 2) + ")" + numeroTelefone.substring(2, 7) + "-" +
+                numeroTelefone.substring(7)*/
+
+        return numeroTelefone;
     }
 
     public static boolean removerPessoa() {
@@ -128,15 +119,17 @@ public abstract class MetodosPessoa {
         return retorno;
     }
 
-    private static ProfissaoVO pesquisarProfissao() {
+    private static Profissao pesquisarProfissao() {
         // Testado
-        List<ProfissaoVO> list;
+        List<Profissao> list;
         ProfissaoVO profissaoVO;
+        Profissao profissao;
 
         long idProfissao;
         boolean profissaoEncontrada;
 
         profissaoVO = new ProfissaoVO();
+        profissao = null;
 
         do {
             profissaoEncontrada = false;
@@ -148,7 +141,7 @@ public abstract class MetodosPessoa {
             list = profissaoVO.obterProfissaoId(idProfissao);
 
             if (list.size() > 0) {
-                profissaoVO = list.get(0);
+                profissao = list.get(0);
                 profissaoEncontrada = true;
             } else {
                 System.out.println("Profissão não encontrada!!!");
@@ -156,12 +149,12 @@ public abstract class MetodosPessoa {
 
         } while (!profissaoEncontrada);
 
-        return profissaoVO;
+        return profissao;
     }
 
     private static long pesquisarPessoa() {
         // Testado
-        List<PessoaVO> list;
+        List<Pessoa> list;
 
         Scanner scanner;
 
@@ -189,7 +182,7 @@ public abstract class MetodosPessoa {
         System.out.println("\n" + "Pessoas: ");
         System.out.println("------------------------------" + "\n");
 
-        for (PessoaVO temp : list) {
+        for (Pessoa temp : list) {
             System.out.printf("Id:%d %s%n", temp.getId(), temp.getNome());
         }
 
@@ -327,11 +320,10 @@ public abstract class MetodosPessoa {
 
     public static void listarPessoa() {
         // Testado
-        List<PessoaVO> listPessoa;
+        List<Pessoa> listPessoa;
         List<TelefoneVO> listTelefone;
 
         TelefoneVO telefoneVO;
-        ProfissaoVO profissaoVO;
 
         String nomePessoa;
         String nomeProfissao;
@@ -340,16 +332,13 @@ public abstract class MetodosPessoa {
         listPessoa = pessoaVO.listarDB();
 
         telefoneVO = new TelefoneVO();
-        profissaoVO = new ProfissaoVO();
-
-        numerosTelefone = null;
 
         System.out.println("\n" + "Pessoas: ");
         System.out.println("------------------------------" + "\n");
-        for (PessoaVO temp : listPessoa) {
+        for (Pessoa temp : listPessoa) {
             nomePessoa = temp.getNome();
 
-            nomeProfissao = profissaoVO.obterProfissaoId(temp.getIdProfissao()).get(0).getNome();
+            nomeProfissao = temp.getProfissao().getNome();
 
             listTelefone = telefoneVO.obterTelefone(temp.getId());
 
@@ -359,6 +348,8 @@ public abstract class MetodosPessoa {
                 for (int i = 0; i < listTelefone.size(); i++) {
                     numerosTelefone[i] = listTelefone.get(i).getNumero();
                 }
+            } else {
+                numerosTelefone = null;
             }
 
             System.out.printf("Nome:%s%nProfissão:%s%nTelefone(s):%s%n%n",

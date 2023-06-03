@@ -11,72 +11,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PessoaVO extends BaseDAO {
-    private long id;
-    private String nome;
-    private long idProfissao;
-
-    public PessoaVO() {
-    }
-
-    public PessoaVO(long id, String nome, long idProfissao) {
-        this.id = id;
-        this.nome = nome;
-        this.idProfissao = idProfissao;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public long getIdProfissao() {
-        return idProfissao;
-    }
-
-    public void setIdProfissao(long idProfissao) {
-        this.idProfissao = idProfissao;
-    }
-
-    @Override
-    public String toString() {
-        return "Id = " + this.id + ", " +
-                "Nome = " + this.nome + ", " +
-                "IdProfissao = " + this.idProfissao;
-    }
-
-    public void inserirBD(Object[] input) {
+    public void inserirBD(Pessoa pessoa) {
         // Testada
         connection = this.getConnection();
 
-        List<PessoaVO> list;
-
-        Pessoa pessoa;
+        List<Pessoa> list;
 
         long idPessoa;
 
-        long idProfissao;
-
         String sql = "INSERT INTO pessoa (nome, id_profissao) VALUES (?, ?)";
 
-        pessoa = (Pessoa) input[0];
-        idProfissao = (long) input[1];
         idPessoa = -1;
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, pessoa.getNome().toUpperCase());
-            preparedStatement.setLong(2, idProfissao);
+            preparedStatement.setLong(2, pessoa.getProfissao().getId());
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -152,28 +102,32 @@ public class PessoaVO extends BaseDAO {
         return retorno;
     }
 
-    public List<PessoaVO> obterPessoa(String nomePessoa) {
+    public List<Pessoa> obterPessoa(String nomePessoa) {
         // Testado
         connection = this.getConnection();
 
-        List<PessoaVO> list = new ArrayList<>();
+        List<Pessoa> list = new ArrayList<>();
 
         ResultSet resultSet;
+
+        ProfissaoVO profissaoVO;
 
         String sql = "SELECT * FROM pessoa WHERE nome LIKE ?";
 
         String nomePesquisa = "%" + nomePessoa + "%";
+
+        profissaoVO = new ProfissaoVO();
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, nomePesquisa.toUpperCase());
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                PessoaVO pessoaVO = new PessoaVO();
-                pessoaVO.setId(resultSet.getInt("id"));
-                pessoaVO.setNome(resultSet.getString("nome"));
-                pessoaVO.setIdProfissao(resultSet.getInt("id_profissao"));
-                list.add(pessoaVO);
+                Pessoa pessoa = new Pessoa();
+                pessoa.setId(resultSet.getInt("id"));
+                pessoa.setNome(resultSet.getString("nome"));
+                pessoa.setProfissao(profissaoVO.obterProfissaoId(resultSet.getInt("id_profissao")).get(0));
+                list.add(pessoa);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -182,26 +136,30 @@ public class PessoaVO extends BaseDAO {
         return list;
     }
 
-    public List<PessoaVO> listarDB() {
+    public List<Pessoa> listarDB() {
         // Testado
         connection = this.getConnection();
 
-        List<PessoaVO> list;
+        List<Pessoa> list;
 
         ResultSet resultSet;
+
+        ProfissaoVO profissaoVO;
 
         String sql = "SELECT * FROM pessoa ORDER BY nome";
 
         list = new ArrayList<>();
 
+        profissaoVO = new ProfissaoVO();
+
         try {
             Statement statement = connection.createStatement();
             resultSet = statement.executeQuery(sql);
             while (resultSet.next()) {
-                PessoaVO pessoaVO = new PessoaVO();
+                Pessoa pessoaVO = new Pessoa();
                 pessoaVO.setId(resultSet.getInt("id"));
                 pessoaVO.setNome(resultSet.getString("nome"));
-                pessoaVO.setIdProfissao(resultSet.getInt("id_profissao"));
+                pessoaVO.setProfissao(profissaoVO.obterProfissaoId(resultSet.getInt("id_profissao")).get(0));
                 list.add(pessoaVO);
             }
         } catch (SQLException e) {

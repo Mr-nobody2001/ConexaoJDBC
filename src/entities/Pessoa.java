@@ -1,8 +1,7 @@
 package entities;
 
-import java.util.Arrays;
-
 public class Pessoa {
+    private Integer id;
     private String nome;
     private Profissao profissao;
     private String[] telefone;
@@ -14,6 +13,14 @@ public class Pessoa {
         this.nome = nome;
         this.profissao = profissao;
         this.telefone = telefone;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getNome() {
@@ -38,12 +45,5 @@ public class Pessoa {
 
     public void setTelefone(String[] telefone) {
         this.telefone = telefone;
-    }
-
-    @Override
-    public String toString() {
-        return "Nome = " + this.nome + ", " +
-                this.profissao + ", " +
-                "Telefone(s) = " + Arrays.toString(telefone);
     }
 }
