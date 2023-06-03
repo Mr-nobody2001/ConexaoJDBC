@@ -1,7 +1,6 @@
 package dao.entitiesVO;
 
 import entities.Profissao;
-import entities.exceptions.SqlUpdateException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

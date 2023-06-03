@@ -1,6 +1,5 @@
 package dao.entitiesVO;
 
-import dao.entitiesVO.BaseDAO;
 import entities.Pessoa;
 
 import java.sql.PreparedStatement;
@@ -45,16 +44,16 @@ public class PessoaVO extends BaseDAO {
         }
     }
 
-    public void alterarDB(long idPessoa, int opcaoAlterar, String alteracao) {
+    public int alterarDB(long idPessoa, int opcaoAlterar, String alteracao) {
         // Testado
         connection = this.getConnection();
 
-        String nomeColuna;
+        int retorno = -1;
+        String nomeColuna = null;
 
         switch (opcaoAlterar) {
             case 1 -> nomeColuna = "nome";
             case 2 -> nomeColuna = "id_profissao";
-            default -> nomeColuna = null;
         }
 
         String sql = "UPDATE pessoa SET " + nomeColuna + " = ? WHERE id = ?";
@@ -69,10 +68,12 @@ public class PessoaVO extends BaseDAO {
             }
 
             preparedStatement.setLong(2, idPessoa);
-            preparedStatement.executeUpdate();
+            retorno = preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        return retorno;
     }
 
     public int removerDB(long idPessoa) {

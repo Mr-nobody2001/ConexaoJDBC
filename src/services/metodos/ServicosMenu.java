@@ -4,7 +4,12 @@ import dao.entitiesVO.PessoaVO;
 import dao.entitiesVO.ProfissaoVO;
 import entities.Pessoa;
 import entities.Profissao;
-import entities.exceptions.*;
+import entities.exceptions.InvalidInputException;
+import entities.exceptions.InvalidLenghtException;
+import entities.exceptions.NotDataException;
+import entities.exceptions.SqlDeleteException;
+import entities.exceptions.SqlUpdateException;
+import entities.exceptions.TargetNotFoundExecption;
 
 import java.util.InputMismatchException;
 
@@ -31,6 +36,7 @@ public abstract class ServicosMenu {
         String mensagem;
 
         ServicosProfissao servicosProfissao = new ServicosProfissao();
+        ServicosPessoa servicosPessoa = new ServicosPessoa();
 
         try {
             switch (opcao) {
@@ -82,7 +88,7 @@ public abstract class ServicosMenu {
                     // Testada
                     Pessoa pessoa;
 
-                    pessoa = MetodosPessoa.inserirPessoa();
+                    pessoa = servicosPessoa.criarPessoa();
 
                     mensagem = "Pessoa incluída com sucesso!!!" + "\n\n" + "Nome: " +
                             pessoa.getNome() + "\n" + "Profissão: " + pessoa.getProfissao().getNome() + "\n" +
@@ -91,39 +97,32 @@ public abstract class ServicosMenu {
 
                 case 6 -> {
                     if (pessoaVO.bancoVazio()) {
-                        System.out.println("\n" + "Não há registros para serem alterados");
-                        return;
+                        throw new NotDataException("não há registros para serem alterados");
                     }
 
-                    if (MetodosPessoa.alterarPessoa()) {
-                        mensagem = "Dados da pessoa alterada com sucesso!!!";
-                    } else {
-                        mensagem = "";
-                    }
+                    servicosPessoa.alterarPessoa();
+
+                    mensagem = "Dados da pessoa alterada com sucesso!!!";
                 }
 
                 case 7 -> {
                     // Testada
                     if (pessoaVO.bancoVazio()) {
-                        System.out.println("\n" + "Não há registros para serem removidos");
-                        return;
+                        throw new NotDataException("não há registros para serem removidos");
                     }
 
-                    if (MetodosPessoa.removerPessoa()) {
-                        mensagem = "Pessoa removida com sucesso!!!";
-                    } else {
-                        mensagem = "Essa pessoa não pode ser removida!!!";
-                    }
+                    servicosPessoa.removerPessoa();
+
+                    mensagem = "Pessoa removida com sucesso!!!";
                 }
 
                 case 8 -> {
                     // Testado
                     if (pessoaVO.bancoVazio()) {
-                        System.out.println("\n" + "Não há registros para serem listados!!!");
-                        return;
+                        throw new NotDataException("não há registros para serem listados");
                     }
 
-                    MetodosPessoa.listarPessoa();
+                    servicosPessoa.listarPessoa();
 
                     mensagem = "------------------------------";
                 }
@@ -137,7 +136,7 @@ public abstract class ServicosMenu {
 
         } catch (InvalidLenghtException | InvalidInputException | TargetNotFoundExecption | InputMismatchException e) {
             System.out.println("\nErro de input: " + e.getMessage());
-        } catch (SqlUpdateException | SqlDeleteException e) {
+        } catch (SqlUpdateException | SqlDeleteException | NotDataException e) {
             System.out.println("\nErro de banco de dados: " + e.getMessage());
         } catch (RuntimeException e) {
             System.out.println("Erro inesperado: " + e.getMessage());

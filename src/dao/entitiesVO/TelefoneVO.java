@@ -78,9 +78,11 @@ public class TelefoneVO extends BaseDAO {
         }
     }
 
-    public void alterarDB(long idTelefone, String alteracao) {
+    public int alterarDB(long idTelefone, String alteracao) {
         // Testado
         connection = this.getConnection();
+
+        int retorno = -1;
 
         String sql = "UPDATE telefone SET numero = ? WHERE id = ?";
 
@@ -88,10 +90,12 @@ public class TelefoneVO extends BaseDAO {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, alteracao);
             preparedStatement.setLong(2, idTelefone);
-            preparedStatement.executeUpdate();
+            retorno = preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        return retorno;
     }
 
     public void removerDBExclusaoPessoa(long idPessoa) {
@@ -109,9 +113,11 @@ public class TelefoneVO extends BaseDAO {
         }
     }
 
-    public void removerDBExclusaoTelefone(long idPessoa, long idTelefone) {
+    public int removerDBExclusaoTelefone(long idPessoa, long idTelefone) {
         // Testada
         connection = this.getConnection();
+
+        int retorno = -1;
 
         String sql = "DELETE FROM telefone WHERE id_pessoa = ? AND id = ?";
 
@@ -119,10 +125,12 @@ public class TelefoneVO extends BaseDAO {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setLong(1, idPessoa);
             preparedStatement.setLong(2, idTelefone);
-            preparedStatement.executeUpdate();
+            retorno = preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        return retorno;
     }
 
     public List<TelefoneVO> obterTelefone(long idPessoa) {

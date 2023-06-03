@@ -183,6 +183,10 @@ public class ServicosProfissao {
         System.out.print("\n" + "Insira o nome da profissão procurada: ");
         nomeProfissao = scanner.nextLine();
 
+        if (nomeProfissao.length() == 0 || nomeProfissao.length() > 50) {
+            throw new InvalidLenghtException("o número de caracteres do nome é inválido");
+        }
+
         listaProfissoes = new ArrayList<>(profissaoVO.obterProfissaoNome(nomeProfissao));
 
         if (listaProfissoes.size() == 0) {
