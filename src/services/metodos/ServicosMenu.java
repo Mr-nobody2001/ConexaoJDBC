@@ -4,6 +4,7 @@ import dao.entitiesVO.PessoaVO;
 import dao.entitiesVO.ProfissaoVO;
 import entities.Pessoa;
 import entities.Profissao;
+import entities.Telefone;
 import entities.exceptions.InvalidInputException;
 import entities.exceptions.InvalidLenghtException;
 import entities.exceptions.NotDataException;
@@ -12,8 +13,6 @@ import entities.exceptions.SqlUpdateException;
 import entities.exceptions.TargetNotFoundExecption;
 
 import java.util.InputMismatchException;
-
-import java.util.Arrays;
 
 public abstract class ServicosMenu {
     public static void mostrar() {
@@ -90,9 +89,16 @@ public abstract class ServicosMenu {
 
                     pessoa = servicosPessoa.criarPessoa();
 
+                    String numeros = "";
+
+                    for (Telefone temp : pessoa.getTelefones()) {
+                        numeros += "(" + temp.getNumero().substring(0, 2) + ")" + temp.getNumero().substring(2, 7) +
+                                "-" + temp.getNumero().substring(7) + " ";
+                    }
+
                     mensagem = "Pessoa incluída com sucesso!!!" + "\n\n" + "Nome: " +
                             pessoa.getNome() + "\n" + "Profissão: " + pessoa.getProfissao().getNome() + "\n" +
-                            "Telefone(s): " + Arrays.toString(pessoa.getTelefone());
+                            "Telefone(s): " + numeros;
                 }
 
                 case 6 -> {
@@ -122,7 +128,7 @@ public abstract class ServicosMenu {
                         throw new NotDataException("não há registros para serem listados");
                     }
 
-                    servicosPessoa.listarPessoa();
+                    servicosPessoa.listarPessoaExtenso();
 
                     mensagem = "------------------------------";
                 }

@@ -1,5 +1,7 @@
 package dao.entitiesVO;
 
+import entities.Telefone;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,69 +9,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TelefoneVO extends BaseDAO {
-    private long id;
-    private String numero;
-    private long idPessoa;
-
-    public TelefoneVO() {
-    }
-
-    public TelefoneVO(long id, String numero, long idPessoa) {
-        this.id = id;
-        this.numero = numero;
-        this.idPessoa = idPessoa;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getNumero() {
-        return numero;
-    }
-
-    public void setNumero(String numero) {
-        this.numero = numero;
-    }
-
-    public long getIdPessoa() {
-        return idPessoa;
-    }
-
-    public void setIdPessoa(long idPessoa) {
-        this.idPessoa = idPessoa;
-    }
-
-    @Override
-    public String toString() {
-        return "TelefoneVO{" +
-                "id=" + id +
-                ", numero='" + numero + '\'' +
-                ", idPessoa=" + idPessoa +
-                '}';
-    }
-
-    public void inserirBD(Object[] input) {
+    public void inserirBD(List<Telefone> numeros, long idPessoa) {
         // Testada
         connection = this.getConnection();
 
-        long idPessoa;
-
-        String[] numerosTelefone;
-
         String sql = "INSERT INTO telefone (numero, id_pessoa) VALUES (?, ?)";
 
-        numerosTelefone = (String[]) input[0];
-        idPessoa = (long) input[1];
-
-        for (int i = 0; i < numerosTelefone.length; i++) {
+        for (int i = 0; i < numeros.size(); i++) {
             try {
                 PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                preparedStatement.setString(1, numerosTelefone[i]);
+                preparedStatement.setString(1, numeros.get(i).getNumero());
                 preparedStatement.setLong(2, idPessoa);
                 preparedStatement.execute();
             } catch (SQLException e) {
@@ -98,7 +47,7 @@ public class TelefoneVO extends BaseDAO {
         return retorno;
     }
 
-    public void removerDBExclusaoPessoa(long idPessoa) {
+    public void removerDbTotal(long idPessoa) {
         // Testada
         connection = this.getConnection();
 
@@ -113,7 +62,7 @@ public class TelefoneVO extends BaseDAO {
         }
     }
 
-    public int removerDBExclusaoTelefone(long idPessoa, long idTelefone) {
+    public int removerDbEspeficico(long idPessoa, long idTelefone) {
         // Testada
         connection = this.getConnection();
 
@@ -133,11 +82,11 @@ public class TelefoneVO extends BaseDAO {
         return retorno;
     }
 
-    public List<TelefoneVO> obterTelefone(long idPessoa) {
+    public List<Telefone> obterTelefone(long idPessoa) {
         // Testado
         connection = this.getConnection();
 
-        List<TelefoneVO> list = new ArrayList<>();
+        List<Telefone> list = new ArrayList<>();
 
         ResultSet resultSet;
 
@@ -148,11 +97,10 @@ public class TelefoneVO extends BaseDAO {
             preparedStatement.setLong(1, idPessoa);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                TelefoneVO telefoneDBTemporario = new TelefoneVO();
-                telefoneDBTemporario.setId(resultSet.getInt("id"));
-                telefoneDBTemporario.setNumero(resultSet.getString("numero"));
-                telefoneDBTemporario.setIdPessoa(resultSet.getInt("id_pessoa"));
-                list.add(telefoneDBTemporario);
+                Telefone telefone = new Telefone();
+                telefone.setId(resultSet.getInt("id"));
+                telefone.setNumero(resultSet.getString("numero"));
+                list.add(telefone);
             }
         } catch (SQLException e) {
             e.printStackTrace();

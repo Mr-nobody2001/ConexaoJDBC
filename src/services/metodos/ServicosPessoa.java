@@ -5,10 +5,10 @@ import dao.entitiesVO.ProfissaoVO;
 import dao.entitiesVO.TelefoneVO;
 import entities.Pessoa;
 import entities.Profissao;
+import entities.Telefone;
 import entities.exceptions.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -21,11 +21,12 @@ public class ServicosPessoa {
         // Testado
         Scanner scanner = new Scanner(System.in);
 
+        TelefoneVO telefoneVO = new TelefoneVO();
+
         Pessoa novaPessoa;
         Profissao profissao;
 
         String nomePessoa;
-        String[] numerosTelefone;
 
         System.out.print("\n" + "Insira o nome da pessoa: ");
         nomePessoa = scanner.nextLine();
@@ -36,27 +37,33 @@ public class ServicosPessoa {
 
         profissao = servicosPessoa.obterProfissao();
 
-        numerosTelefone = servicosTelefone.criarTelefone();
+        novaPessoa = new Pessoa(nomePessoa, profissao);
 
-        novaPessoa = new Pessoa(nomePessoa, profissao, numerosTelefone);
+        servicosTelefone.criarTelefone(novaPessoa);
 
         pessoaVO.inserirBD(novaPessoa);
+
+        List<Pessoa> listaPessoas = pessoaVO.obterPessoa(nomePessoa);
+
+        novaPessoa.setId(listaPessoas.get(listaPessoas.size() - 1).getId());
+
+        telefoneVO.inserirBD(novaPessoa.getTelefones(), novaPessoa.getId());
 
         return novaPessoa;
     }
 
-    public boolean alterarPessoa() {
+    public void alterarPessoa() {
         // Testado
         Scanner scanner = new Scanner(System.in);
 
         TelefoneVO telefoneVO = new TelefoneVO();
 
-        int opcao;
-        long idPessoa, idTelefone;
-        String alteracao;
-        String[] numerosTelefone;
+        Pessoa pessoa;
 
-        idPessoa = servicosPessoa.obterIdPessoa();
+        int opcao;
+        String alteracao;
+
+        pessoa = servicosPessoa.obterPessoa();
 
         System.out.println("\n" + "Escolha uma opção");
         System.out.println("1 - Alterar o nome da pessoa");
@@ -82,7 +89,7 @@ public class ServicosPessoa {
                     throw new InvalidLenghtException("o número de caracteres do nome é inválido");
                 }
 
-                int retorno = pessoaVO.alterarDB(idPessoa, opcao, alteracao);
+                int retorno = pessoaVO.alterarDB(pessoa.getId(), opcao, alteracao);
 
                 if (retorno == 0) {
                     throw new SqlUpdateException("não foi possível realizer a alteração dos dados");
@@ -94,9 +101,9 @@ public class ServicosPessoa {
 
                 alteracao = Long.toString(servicosPessoa.obterProfissao().getId());
 
-                pessoaVO.alterarDB(idPessoa, opcao, alteracao);
+                pessoaVO.alterarDB(pessoa.getId(), opcao, alteracao);
 
-                int retorno = pessoaVO.alterarDB(idPessoa, opcao, alteracao);
+                int retorno = pessoaVO.alterarDB(pessoa.getId(), opcao, alteracao);
 
                 if (retorno == 0) {
                     throw new SqlUpdateException("não foi possível realizer a alteração dos dados");
@@ -117,75 +124,110 @@ public class ServicosPessoa {
                 }
 
                 switch (opcao) {
-                    case 1 -> servicosTelefone.removerTelefones(idPessoa);
+                    case 1 -> servicosTelefone.removerTelefones(pessoa.getId());
 
                     case 2 -> {
-                        numerosTelefone = servicosTelefone.criarTelefone();
+                        int quantidadeNumerosAnterior = pessoa.getTelefones().size();
 
-                        if (numerosTelefone == null) {
+                        servicosTelefone.criarTelefone(pessoa);
+
+                        int quantidadeNumerosAtual = pessoa.getTelefones().size();
+
+                        if (quantidadeNumerosAtual == quantidadeNumerosAnterior) {
                             throw new InvalidInputException("são permitidos apenas valores positivos");
                         }
 
-                        telefoneVO.inserirBD(new Object[]{numerosTelefone, idPessoa});
+                        telefoneVO.inserirBD(pessoa.getTelefones(), pessoa.getId());
                     }
 
-                    case 3 -> servicosTelefone.alterarTelefones(idPessoa);
+                    case 3 -> servicosTelefone.alterarTelefones(pessoa.getId());
 
                 }
             }
         }
-
-        return true;
     }
 
     public void removerPessoa() {
         // Testado
-        long idPessoa;
+        TelefoneVO telefoneVO = new TelefoneVO();
 
-        idPessoa = obterIdPessoa();
+        Pessoa pessoa = obterPessoa();
 
-        int retorno = pessoaVO.removerDB(idPessoa);
+        telefoneVO.removerDbTotal(pessoa.getId());
+
+        int retorno = pessoaVO.removerDB(pessoa.getId());
 
         if (retorno == 0) {
             throw new SqlDeleteException("não foi possível fazer a exclusão dos dados");
         }
     }
 
-    public void listarPessoa() {
+    public void listarPessoaExtenso() {
         // Testado
         List<Pessoa> listPessoa;
-        List<TelefoneVO> listTelefone;
+        List<Telefone> listTelefone;
 
         TelefoneVO telefoneVO = new TelefoneVO();
 
         String nomePessoa;
         String nomeProfissao;
-        String[] numerosTelefone;
+        String numeros;
 
         listPessoa = pessoaVO.listarDB();
 
         System.out.println("\n" + "Pessoas: ");
         System.out.println("------------------------------" + "\n");
         for (Pessoa temp : listPessoa) {
+            numeros = "";
+
             nomePessoa = temp.getNome();
 
             nomeProfissao = temp.getProfissao().getNome();
 
             listTelefone = telefoneVO.obterTelefone(temp.getId());
 
-            if (listTelefone.size() > 0) {
-                numerosTelefone = new String[listTelefone.size()];
-
-                for (int i = 0; i < listTelefone.size(); i++) {
-                    numerosTelefone[i] = listTelefone.get(i).getNumero();
-                }
-            } else {
-                numerosTelefone = null;
+            for (Telefone temp2 :listTelefone) {
+                numeros += "(" + temp2.getNumero().substring(0, 2) + ")" + temp2.getNumero().substring(2, 7) +
+                        "-" + temp2.getNumero().substring(7) + " ";
             }
 
             System.out.printf("Nome:%s%nProfissão:%s%nTelefone(s):%s%n%n",
-                    nomePessoa, nomeProfissao, Arrays.toString(numerosTelefone));
+                    nomePessoa, nomeProfissao, numeros);
         }
+    }
+
+    private Pessoa listarPessoaResumida(List<Pessoa> listaPessoas) {
+        Scanner scanner = new Scanner(System.in);
+
+        long idPessoa;
+
+        System.out.println("\n" + "Pessoas: ");
+        System.out.println("------------------------------" + "\n");
+
+        for (Pessoa temp : listaPessoas) {
+            System.out.printf("Id:%d %s%n", temp.getId(), temp.getNome());
+        }
+
+        System.out.print("\n" + "Insira o id da pessoa escolhida: ");
+        idPessoa = scanner.nextLong();
+
+        if (idPessoa <= 0) {
+            throw new InvalidInputException("valor de id inválido");
+        }
+
+        Pessoa alvo = null;
+
+        for (Pessoa listaPessoa : listaPessoas) {
+            if (listaPessoa.getId() == idPessoa) {
+                alvo = listaPessoa;
+            }
+        }
+
+        if (alvo == null) {
+            throw new TargetNotFoundExecption("não houve nenhuma correspondência");
+        }
+
+        return alvo;
     }
 
     private Profissao obterProfissao() {
@@ -220,7 +262,7 @@ public class ServicosPessoa {
         return profissao;
     }
 
-    public long obterIdPessoa() {
+    public Pessoa obterPessoa() {
         // Testado
         List<Pessoa> listaPessoas;
 
@@ -242,20 +284,6 @@ public class ServicosPessoa {
             throw new TargetNotFoundExecption("não houve nenhuma correspondência");
         }
 
-        System.out.println("\n" + "Pessoas: ");
-        System.out.println("------------------------------" + "\n");
-
-        for (Pessoa temp : listaPessoas) {
-            System.out.printf("Id:%d %s%n", temp.getId(), temp.getNome());
-        }
-
-        System.out.print("\n" + "Insira o id da pessoa escolhida: ");
-        idPessoa = scanner.nextLong();
-
-        if (idPessoa <= 0) {
-            throw new InvalidInputException("valor de id inválido");
-        }
-
-        return idPessoa;
+        return listarPessoaResumida(listaPessoas);
     }
 }

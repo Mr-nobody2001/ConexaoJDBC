@@ -14,13 +14,7 @@ public class PessoaVO extends BaseDAO {
         // Testada
         connection = this.getConnection();
 
-        List<Pessoa> list;
-
-        long idPessoa;
-
         String sql = "INSERT INTO pessoa (nome, id_profissao) VALUES (?, ?)";
-
-        idPessoa = -1;
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -29,18 +23,6 @@ public class PessoaVO extends BaseDAO {
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        }
-
-        list = this.obterPessoa(pessoa.getNome());
-
-        if (list.size() > 0) {
-            idPessoa = list.get(0).getId();
-        }
-
-        TelefoneVO telefoneVO = new TelefoneVO();
-
-        if (idPessoa != -1 && pessoa.getTelefone() != null) {
-            telefoneVO.inserirBD(new Object[]{pessoa.getTelefone(), idPessoa});
         }
     }
 
@@ -78,12 +60,6 @@ public class PessoaVO extends BaseDAO {
 
     public int removerDB(long idPessoa) {
         // Testada
-        TelefoneVO telefoneVO;
-
-        telefoneVO = new TelefoneVO();
-
-        telefoneVO.removerDBExclusaoPessoa(idPessoa);
-
         connection = this.getConnection();
 
         int retorno;
@@ -113,7 +89,7 @@ public class PessoaVO extends BaseDAO {
 
         ProfissaoVO profissaoVO;
 
-        String sql = "SELECT * FROM pessoa WHERE nome LIKE ?";
+        String sql = "SELECT * FROM pessoa WHERE nome LIKE ? ORDER BY id";
 
         String nomePesquisa = "%" + nomePessoa + "%";
 

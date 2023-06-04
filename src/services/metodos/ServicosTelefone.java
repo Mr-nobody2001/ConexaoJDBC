@@ -1,7 +1,8 @@
 package services.metodos;
 
-import dao.entitiesVO.PessoaVO;
 import dao.entitiesVO.TelefoneVO;
+import entities.Pessoa;
+import entities.Telefone;
 import entities.exceptions.InvalidInputException;
 import entities.exceptions.NotDataException;
 import entities.exceptions.SqlDeleteException;
@@ -13,11 +14,10 @@ import java.util.Scanner;
 public class ServicosTelefone {
     private static final TelefoneVO telefoneVO = new TelefoneVO();
 
-    public String[] criarTelefone() {
+    public void criarTelefone(Pessoa pessoa) {
         Scanner scanner = new Scanner(System.in);
 
         int quantidadeNumeros;
-        String[] numerosTelefone = null;
 
         System.out.print("\n" + "Insira a quantidade de números de telefone que serão cadastrados: ");
         quantidadeNumeros = scanner.nextInt();
@@ -27,15 +27,11 @@ public class ServicosTelefone {
         }
 
         if (quantidadeNumeros > 0) {
-            numerosTelefone = new String[quantidadeNumeros];
-
             for (int i = 0; i < quantidadeNumeros; i++) {
                 System.out.print("\n" + "Insira o telefone " + (i + 1) + " (com DDD) : ");
-                numerosTelefone[i] = verificarFormatoTelefone();
+                pessoa.getTelefones().add(new Telefone(verificarFormatoTelefone()));
             }
         }
-
-        return numerosTelefone;
     }
 
     public void alterarTelefones(long idPessoa) {
@@ -79,7 +75,7 @@ public class ServicosTelefone {
             throw new InvalidInputException("valor de id inválido");
         }
 
-        int retorno = telefoneVO.removerDBExclusaoTelefone(idPessoa, idTelefone);
+        int retorno = telefoneVO.removerDbEspeficico(idPessoa, idTelefone);
 
         if (retorno == 0) {
             throw new SqlDeleteException("não foi possível fazer a exclusão dos dados");
@@ -87,7 +83,7 @@ public class ServicosTelefone {
     }
 
     public void listarTelefones(long idPessoa) {
-        List<TelefoneVO> listaTelefones;
+        List<Telefone> listaTelefones;
 
         TelefoneVO telefoneVO = new TelefoneVO();
 
@@ -100,7 +96,7 @@ public class ServicosTelefone {
         System.out.println("\n" + "Telefones: ");
         System.out.println("------------------------------" + "\n");
 
-        for (TelefoneVO temp : listaTelefones) {
+        for (Telefone temp : listaTelefones) {
             System.out.printf("Id:%d %s%n", temp.getId(), temp.getNumero());
         }
     }
@@ -116,9 +112,6 @@ public class ServicosTelefone {
             System.out.print("Número de telefone inválido. Insira novamente: ");
             numeroTelefone = scanner.next();
         }
-
-        /*"(" + numeroTelefone.substring(0, 2) + ")" + numeroTelefone.substring(2, 7) + "-" +
-                numeroTelefone.substring(7)*/
 
         return numeroTelefone;
     }

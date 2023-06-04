@@ -1,18 +1,20 @@
 package entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Pessoa {
     private Integer id;
     private String nome;
     private Profissao profissao;
-    private String[] telefone;
+    private final List<Telefone> telefones = new ArrayList<>();
 
     public Pessoa() {
     }
 
-    public Pessoa(String nome, Profissao profissao, String[] telefone) {
+    public Pessoa(String nome, Profissao profissao) {
         this.nome = nome;
         this.profissao = profissao;
-        this.telefone = telefone;
     }
 
     public Integer getId() {
@@ -39,11 +41,7 @@ public class Pessoa {
         this.profissao = profissao;
     }
 
-    public String[] getTelefone() {
-        return telefone;
-    }
-
-    public void setTelefone(String[] telefone) {
-        this.telefone = telefone;
+    public List<Telefone> getTelefones() {
+        return telefones;
     }
 }
