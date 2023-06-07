@@ -12,15 +12,14 @@ import java.util.List;
 public class ProfissaoVO extends BaseDAO {
     public void inserirBD(Profissao profissao) {
         // Testada
-        connection = this.getConnection();
+        connection = getConnection();
 
         String sql = "INSERT INTO profissao (nome, descricao) VALUES (?, ?)";
 
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, profissao.getNome().toUpperCase());
             preparedStatement.setString(2, profissao.getDescricao().toUpperCase());
-            preparedStatement.execute();
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -28,7 +27,7 @@ public class ProfissaoVO extends BaseDAO {
 
     public Integer alterarDB(long idProfissao, int opcaoAlterar, String alteracao) {
         // Testado
-        connection = this.getConnection();
+        connection = getConnection();
 
         int retorno = -1;
 
@@ -42,8 +41,7 @@ public class ProfissaoVO extends BaseDAO {
 
         String sql = "UPDATE profissao SET " + nomeColuna + " = ? WHERE id = ?";
 
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, alteracao.toUpperCase());
             preparedStatement.setLong(2, idProfissao);
             retorno = preparedStatement.executeUpdate();
@@ -56,7 +54,7 @@ public class ProfissaoVO extends BaseDAO {
 
     public int removerDB(long idProfissao) {
         // Testada
-        connection = this.getConnection();
+        connection = getConnection();
 
         int retorno;
 
@@ -64,8 +62,7 @@ public class ProfissaoVO extends BaseDAO {
 
         String sql = "DELETE FROM profissao WHERE id = ?";
 
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
             preparedStatement.setLong(1, idProfissao);
             retorno = preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -77,29 +74,30 @@ public class ProfissaoVO extends BaseDAO {
 
     public List<Profissao> obterProfissaoNome(String nomeProfissao) {
         // Testado
-        connection = this.getConnection();
+        connection = getConnection();
 
         List<Profissao> list = new ArrayList<>();
 
-        ResultSet resultSet;
+        ResultSet resultSet = null;
 
         String sql = "SELECT * FROM profissao WHERE nome LIKE ?";
 
         String nomePesquisa = "%" + nomeProfissao + "%";
 
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
             preparedStatement.setString(1, nomePesquisa.toUpperCase());
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 Profissao profissao = new Profissao();
-                profissao.setId(resultSet.getInt("id"));
+                profissao.setId(resultSet.getLong("id"));
                 profissao.setNome(resultSet.getString("nome"));
                 profissao.setDescricao(resultSet.getString("descricao"));
                 list.add(profissao);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            fecharResultSet(resultSet);
         }
 
         return list;
@@ -107,28 +105,29 @@ public class ProfissaoVO extends BaseDAO {
 
     public List<Profissao> obterProfissaoId(long idProfissao) {
         // Testado
-        connection = this.getConnection();
+        connection = getConnection();
 
         List<Profissao> list = new ArrayList<>();
 
-        ResultSet resultSet;
+        ResultSet resultSet = null;
 
         Profissao profissao = new Profissao();
 
         String sql = "SELECT * FROM profissao WHERE id = ?";
 
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
             preparedStatement.setLong(1, idProfissao);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                profissao.setId(resultSet.getInt("id"));
+                profissao.setId(resultSet.getLong("id"));
                 profissao.setNome(resultSet.getString("nome"));
                 profissao.setDescricao(resultSet.getString("descricao"));
                 list.add(profissao);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            fecharResultSet(resultSet);
         }
 
         return list;
@@ -136,28 +135,29 @@ public class ProfissaoVO extends BaseDAO {
 
     public List<Profissao> listarDB() {
         // Testado
-        connection = this.getConnection();
+        connection = getConnection();
 
         List<Profissao> list;
 
-        ResultSet resultSet;
+        ResultSet resultSet = null;
 
         String sql = "SELECT * FROM profissao ORDER BY nome";
 
         list = new ArrayList<>();
 
-        try {
-            Statement statement = connection.createStatement();
+        try (Statement statement = connection.createStatement();) {
             resultSet = statement.executeQuery(sql);
             while (resultSet.next()) {
                 Profissao profissaoDBTemporaria = new Profissao();
-                profissaoDBTemporaria.setId(resultSet.getInt("id"));
+                profissaoDBTemporaria.setId(resultSet.getLong("id"));
                 profissaoDBTemporaria.setNome(resultSet.getString("nome"));
                 profissaoDBTemporaria.setDescricao(resultSet.getString("descricao"));
                 list.add(profissaoDBTemporaria);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            fecharResultSet(resultSet);
         }
 
         return list;
@@ -167,18 +167,19 @@ public class ProfissaoVO extends BaseDAO {
         // Testado
         connection = this.getConnection();
 
-        ResultSet resultSet;
+        ResultSet resultSet = null;
 
         String sql = "SELECT * FROM profissao";
 
         boolean bancoVazio = true;
 
-        try {
-            Statement statement = connection.createStatement();
+        try (Statement statement = connection.createStatement();) {
             resultSet = statement.executeQuery(sql);
             bancoVazio = !resultSet.next();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            fecharResultSet(resultSet);
         }
 
         return bancoVazio;

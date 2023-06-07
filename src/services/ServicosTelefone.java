@@ -1,4 +1,4 @@
-package services.metodos;
+package services;
 
 import dao.entitiesVO.TelefoneVO;
 import entities.Pessoa;

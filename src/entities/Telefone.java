@@ -1,7 +1,7 @@
 package entities;
 
 public class Telefone {
-    private Integer id;
+    private Long id;
     private String numero;
 
     public Telefone() {
@@ -11,11 +11,11 @@ public class Telefone {
         this.numero = numero;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

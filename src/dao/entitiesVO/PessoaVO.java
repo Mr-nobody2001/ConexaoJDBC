@@ -1,6 +1,7 @@
 package dao.entitiesVO;
 
 import entities.Pessoa;
+import entities.exceptions.SqlInsertException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,25 +11,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PessoaVO extends BaseDAO {
-    public void inserirBD(Pessoa pessoa) {
+    public long inserirBD(Pessoa pessoa) {
         // Testada
-        connection = this.getConnection();
+        connection = getConnection();
+
+        ResultSet resultSet = null;
 
         String sql = "INSERT INTO pessoa (nome, id_profissao) VALUES (?, ?)";
 
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, pessoa.getNome().toUpperCase());
             preparedStatement.setLong(2, pessoa.getProfissao().getId());
-            preparedStatement.execute();
+            preparedStatement.executeUpdate();
+            resultSet = preparedStatement.getGeneratedKeys();
+
+            if (!resultSet.next()) {
+                throw new SqlInsertException("não foi possível inserir a nova pessoa");
+            } else {
+                return resultSet.getLong(1);
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            fecharResultSet(resultSet);
         }
     }
 
     public int alterarDB(long idPessoa, int opcaoAlterar, String alteracao) {
         // Testado
-        connection = this.getConnection();
+        connection = getConnection();
 
         int retorno = -1;
         String nomeColuna = null;
@@ -40,9 +51,7 @@ public class PessoaVO extends BaseDAO {
 
         String sql = "UPDATE pessoa SET " + nomeColuna + " = ? WHERE id = ?";
 
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             if (opcaoAlterar == 1) {
                 preparedStatement.setString(1, alteracao.toUpperCase());
             } else {
@@ -60,7 +69,7 @@ public class PessoaVO extends BaseDAO {
 
     public int removerDB(long idPessoa) {
         // Testada
-        connection = this.getConnection();
+        connection = getConnection();
 
         int retorno;
 
@@ -68,8 +77,7 @@ public class PessoaVO extends BaseDAO {
 
         retorno = 2;
 
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, idPessoa);
             retorno = preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -81,11 +89,11 @@ public class PessoaVO extends BaseDAO {
 
     public List<Pessoa> obterPessoa(String nomePessoa) {
         // Testado
-        connection = this.getConnection();
+        connection = getConnection();
 
         List<Pessoa> list = new ArrayList<>();
 
-        ResultSet resultSet;
+        ResultSet resultSet = null;
 
         ProfissaoVO profissaoVO;
 
@@ -95,19 +103,20 @@ public class PessoaVO extends BaseDAO {
 
         profissaoVO = new ProfissaoVO();
 
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
             preparedStatement.setString(1, nomePesquisa.toUpperCase());
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 Pessoa pessoa = new Pessoa();
-                pessoa.setId(resultSet.getInt("id"));
+                pessoa.setId(resultSet.getLong("id"));
                 pessoa.setNome(resultSet.getString("nome"));
                 pessoa.setProfissao(profissaoVO.obterProfissaoId(resultSet.getInt("id_profissao")).get(0));
                 list.add(pessoa);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            fecharResultSet(resultSet);
         }
 
         return list;
@@ -115,11 +124,11 @@ public class PessoaVO extends BaseDAO {
 
     public List<Pessoa> listarDB() {
         // Testado
-        connection = this.getConnection();
+        connection = getConnection();
 
         List<Pessoa> list;
 
-        ResultSet resultSet;
+        ResultSet resultSet = null;
 
         ProfissaoVO profissaoVO;
 
@@ -129,27 +138,28 @@ public class PessoaVO extends BaseDAO {
 
         profissaoVO = new ProfissaoVO();
 
-        try {
-            Statement statement = connection.createStatement();
+        try (Statement statement = connection.createStatement()) {
             resultSet = statement.executeQuery(sql);
             while (resultSet.next()) {
-                Pessoa pessoaVO = new Pessoa();
-                pessoaVO.setId(resultSet.getInt("id"));
-                pessoaVO.setNome(resultSet.getString("nome"));
-                pessoaVO.setProfissao(profissaoVO.obterProfissaoId(resultSet.getInt("id_profissao")).get(0));
-                list.add(pessoaVO);
+                Pessoa pessoa = new Pessoa();
+                pessoa.setId(resultSet.getLong("id"));
+                pessoa.setNome(resultSet.getString("nome"));
+                pessoa.setProfissao(profissaoVO.obterProfissaoId(resultSet.getInt("id_profissao")).get(0));
+                list.add(pessoa);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            fecharResultSet(resultSet);
         }
 
         return list;
     }
 
     public boolean bancoVazio() {
-        connection = this.getConnection();
+        connection = getConnection();
 
-        ResultSet resultSet;
+        ResultSet resultSet = null;
 
         String sql = "SELECT * FROM pessoa";
 
@@ -157,12 +167,13 @@ public class PessoaVO extends BaseDAO {
 
         bancoVazio = true;
 
-        try {
-            Statement statement = connection.createStatement();
+        try (Statement statement = connection.createStatement();) {
             resultSet = statement.executeQuery(sql);
             bancoVazio = !resultSet.next();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            fecharResultSet(resultSet);
         }
 
         return bancoVazio;

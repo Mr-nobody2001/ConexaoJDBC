@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Pessoa {
-    private Integer id;
+    private Long id;
     private String nome;
     private Profissao profissao;
     private final List<Telefone> telefones = new ArrayList<>();
@@ -17,11 +17,11 @@ public class Pessoa {
         this.profissao = profissao;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

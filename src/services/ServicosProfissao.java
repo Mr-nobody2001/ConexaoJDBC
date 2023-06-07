@@ -1,4 +1,4 @@
-package services.metodos;
+package services;
 
 import dao.entitiesVO.ProfissaoVO;
 import entities.Profissao;
@@ -109,7 +109,7 @@ public class ServicosProfissao {
         System.out.println("\n" + "Profissões: ");
         System.out.println("------------------------------" + "\n");
         for (Profissao temp : list) {
-            System.out.printf("%s %s : %s%n%n", temp.getId(), temp.getNome(), temp.getDescricao());
+            System.out.printf("%s %s : %s%n%n", temp.getId(), Formatar.formatarNome(temp.getNome()), temp.getDescricao().toLowerCase());
         }
     }
 
@@ -131,7 +131,7 @@ public class ServicosProfissao {
         System.out.println("\n" + "Profissões: ");
         System.out.println("------------------------------" + "\n");
         for (Profissao temp : listaProfissoes) {
-            System.out.printf("Id:%s %s %n", temp.getId(), temp.getNome());
+            System.out.printf("Id:%s %s %n", temp.getId(), Formatar.formatarNome(temp.getNome()));
         }
     }
 

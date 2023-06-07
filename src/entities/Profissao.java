@@ -1,7 +1,7 @@
 package entities;
 
 public class Profissao {
-    private Integer id;
+    private Long id;
     private String nome;
     private String descricao;
 
@@ -13,11 +13,11 @@ public class Profissao {
         this.descricao = descricao;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

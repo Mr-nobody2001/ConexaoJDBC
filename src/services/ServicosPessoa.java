@@ -1,4 +1,4 @@
-package services.metodos;
+package services;
 
 import dao.entitiesVO.PessoaVO;
 import dao.entitiesVO.ProfissaoVO;
@@ -41,11 +41,7 @@ public class ServicosPessoa {
 
         servicosTelefone.criarTelefone(novaPessoa);
 
-        pessoaVO.inserirBD(novaPessoa);
-
-        List<Pessoa> listaPessoas = pessoaVO.obterPessoa(nomePessoa);
-
-        novaPessoa.setId(listaPessoas.get(listaPessoas.size() - 1).getId());
+        novaPessoa.setId(pessoaVO.inserirBD(novaPessoa));
 
         telefoneVO.inserirBD(novaPessoa.getTelefones(), novaPessoa.getId());
 
@@ -192,7 +188,7 @@ public class ServicosPessoa {
             }
 
             System.out.printf("Nome:%s%nProfissão:%s%nTelefone(s):%s%n%n",
-                    nomePessoa, nomeProfissao, numeros);
+                    Formatar.formatarNome(nomePessoa), Formatar.formatarNome(nomeProfissao), numeros);
         }
     }
 
@@ -205,7 +201,7 @@ public class ServicosPessoa {
         System.out.println("------------------------------" + "\n");
 
         for (Pessoa temp : listaPessoas) {
-            System.out.printf("Id:%d %s%n", temp.getId(), temp.getNome());
+            System.out.printf("Id:%d %s%n", temp.getId(), Formatar.formatarNome(temp.getNome()));
         }
 
         System.out.print("\n" + "Insira o id da pessoa escolhida: ");

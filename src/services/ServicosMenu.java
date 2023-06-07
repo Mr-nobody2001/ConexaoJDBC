@@ -1,4 +1,4 @@
-package services.metodos;
+package services;
 
 import dao.entitiesVO.PessoaVO;
 import dao.entitiesVO.ProfissaoVO;
@@ -30,12 +30,12 @@ public abstract class ServicosMenu {
     }
 
     public static void executar(int opcao) {
-        PessoaVO pessoaVO = new PessoaVO();
-        ProfissaoVO profissaoVO = new ProfissaoVO();
-        String mensagem;
-
         ServicosProfissao servicosProfissao = new ServicosProfissao();
         ServicosPessoa servicosPessoa = new ServicosPessoa();
+        PessoaVO pessoaVO = new PessoaVO();
+        ProfissaoVO profissaoVO = new ProfissaoVO();
+
+        String mensagem;
 
         try {
             switch (opcao) {
