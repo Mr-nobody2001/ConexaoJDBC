@@ -59,8 +59,6 @@ public class ProfissaoVO extends BaseDAO {
 
         int retorno;
 
-        retorno = 2;
-
         String sql = "DELETE FROM profissao WHERE id = ?";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
@@ -84,7 +82,7 @@ public class ProfissaoVO extends BaseDAO {
 
         String sql = "SELECT * FROM profissao WHERE nome LIKE ?";
 
-        String nomePesquisa = "%" + nomeProfissao + "%";
+        String nomePesquisa = nomeProfissao + "%";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
             preparedStatement.setString(1, nomePesquisa.toUpperCase());

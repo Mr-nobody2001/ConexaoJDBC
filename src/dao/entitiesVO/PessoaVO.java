@@ -99,7 +99,7 @@ public class PessoaVO extends BaseDAO {
 
         String sql = "SELECT * FROM pessoa WHERE nome LIKE ? ORDER BY id";
 
-        String nomePesquisa = "%" + nomePessoa + "%";
+        String nomePesquisa = nomePessoa + "%";
 
         profissaoVO = new ProfissaoVO();
 

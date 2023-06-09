@@ -193,13 +193,17 @@ public class ServicosProfissao {
             throw new TargetNotFoundExecption("não houve nenhuma correspondência");
         }
 
-        listarProfissaoResumida(listaProfissoes);
+        if (listaProfissoes.size() > 1) {
+            listarProfissaoResumida(listaProfissoes);
 
-        System.out.print("\n" + "Insira o id da profissão escolhida: ");
-        idProfissao = scanner.nextLong();
+            System.out.print("\n" + "Insira o id da profissão escolhida: ");
+            idProfissao = scanner.nextLong();
 
-        if (idProfissao <= 0) {
-            throw new InvalidInputException("valor de id inválido");
+            if (idProfissao <= 0) {
+                throw new InvalidInputException("valor de id inválido");
+            }
+        } else {
+            idProfissao = listaProfissoes.get(0).getId();
         }
 
         return idProfissao;

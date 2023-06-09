@@ -182,7 +182,7 @@ public class ServicosPessoa {
 
             listTelefone = telefoneVO.obterTelefone(temp.getId());
 
-            for (Telefone temp2 :listTelefone) {
+            for (Telefone temp2 : listTelefone) {
                 numeros += "(" + temp2.getNumero().substring(0, 2) + ")" + temp2.getNumero().substring(2, 7) +
                         "-" + temp2.getNumero().substring(7) + " ";
             }
@@ -226,6 +226,37 @@ public class ServicosPessoa {
         return alvo;
     }
 
+    private Pessoa obterPessoaNome() {
+        List<Pessoa> listaPessoas;
+
+        Scanner scanner = new Scanner(System.in);
+
+        Pessoa pessoa;
+
+        String nomePessoa;
+
+        System.out.print("\n" + "Insira o nome da pessoa procurada: ");
+        nomePessoa = scanner.nextLine();
+
+        if (nomePessoa.length() == 0 || nomePessoa.length() > 50) {
+            throw new InvalidLenghtException("o número de caracteres do nome é inválido");
+        }
+
+        listaPessoas = new ArrayList<>(pessoaVO.obterPessoa(nomePessoa));
+
+        if (listaPessoas.size() == 0) {
+            throw new TargetNotFoundExecption("não houve nenhuma correspondência");
+        }
+
+        if (listaPessoas.size() > 1) {
+            pessoa = listarPessoaResumida(listaPessoas);
+        } else {
+            pessoa = listaPessoas.get(0);
+        }
+
+        return pessoa;
+    }
+
     private Profissao obterProfissao() {
         // Testado
         List<Profissao> listaProfissoes;
@@ -260,26 +291,31 @@ public class ServicosPessoa {
 
     public Pessoa obterPessoa() {
         // Testado
-        List<Pessoa> listaPessoas;
-
         Scanner scanner = new Scanner(System.in);
 
-        long idPessoa;
-        String nomePessoa;
+        Pessoa pessoa;
 
-        System.out.print("\n" + "Insira o nome da pessoa procurada: ");
-        nomePessoa = scanner.nextLine();
+        int opcao;
 
-        if (nomePessoa.length() == 0 || nomePessoa.length() > 50) {
-            throw new InvalidLenghtException("o número de caracteres do nome é inválido");
+        System.out.println("\n" + "Escolha uma opção");
+        System.out.println("1 - Procurar pessoa pelo nome");
+        System.out.println("2 - Procurar pessoa pelo id");
+
+        System.out.print("\n" + "Opção: ");
+        opcao = scanner.nextInt();
+
+        if (opcao != 1 && opcao != 2) {
+            throw new InvalidInputException("opcão inválida");
         }
 
-        listaPessoas = new ArrayList<>(pessoaVO.obterPessoa(nomePessoa));
+        switch (opcao) {
+            case 1 -> pessoa = obterPessoaNome();
 
-        if (listaPessoas.size() == 0) {
-            throw new TargetNotFoundExecption("não houve nenhuma correspondência");
+            case 2 -> pessoa = servicosPessoa.listarPessoaResumida(pessoaVO.listarDB());
+
+            default -> pessoa = null;
         }
 
-        return listarPessoaResumida(listaPessoas);
+        return pessoa;
     }
 }
