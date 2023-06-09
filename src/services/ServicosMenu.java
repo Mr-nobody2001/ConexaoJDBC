@@ -5,12 +5,7 @@ import dao.entitiesVO.ProfissaoVO;
 import entities.Pessoa;
 import entities.Profissao;
 import entities.Telefone;
-import entities.exceptions.InvalidInputException;
-import entities.exceptions.InvalidLenghtException;
-import entities.exceptions.NotDataException;
-import entities.exceptions.SqlDeleteException;
-import entities.exceptions.SqlUpdateException;
-import entities.exceptions.TargetNotFoundExecption;
+import entities.exceptions.*;
 
 import java.util.InputMismatchException;
 
@@ -142,7 +137,7 @@ public abstract class ServicosMenu {
 
         } catch (InvalidLenghtException | InvalidInputException | TargetNotFoundExecption | InputMismatchException e) {
             System.out.println("\nErro de input: " + e.getMessage());
-        } catch (SqlUpdateException | SqlDeleteException | NotDataException e) {
+        } catch (SqlInsertException | SqlUpdateException | SqlDeleteException | NotDataException | IntegrityConstraintException e) {
             System.out.println("\nErro de banco de dados: " + e.getMessage());
         } catch (RuntimeException e) {
             System.out.println("Erro inesperado: " + e.getMessage());

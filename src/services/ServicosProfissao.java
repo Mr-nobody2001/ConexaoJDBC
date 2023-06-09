@@ -195,7 +195,7 @@ public class ServicosProfissao {
 
         listarProfissaoResumida(listaProfissoes);
 
-        System.out.print("\n" + "Insira o id da pessoa escolhida: ");
+        System.out.print("\n" + "Insira o id da profissão escolhida: ");
         idProfissao = scanner.nextLong();
 
         if (idProfissao <= 0) {

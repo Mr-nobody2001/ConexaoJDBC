@@ -1,6 +1,7 @@
 package dao.entitiesVO;
 
 import entities.Profissao;
+import entities.exceptions.IntegrityConstraintException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -66,7 +67,8 @@ public class ProfissaoVO extends BaseDAO {
             preparedStatement.setLong(1, idProfissao);
             retorno = preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IntegrityConstraintException("a profissão não pode ser excluída pois isso fere a restrição " +
+                    "de integridade referencial");
         }
 
         return retorno;
