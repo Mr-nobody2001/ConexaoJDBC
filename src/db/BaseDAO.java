@@ -1,4 +1,4 @@
-package dao.entitiesVO;
+package db;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -61,7 +61,7 @@ public abstract class BaseDAO {
 
     private static Properties getProperties() {
         String path = "C:\\Users\\gabri\\OneDrive\\Documentos\\Conteúdo Faculdade\\Segundo Semestre\\" +
-                "Técnicas de programação\\trabalhos\\trabalho4\\src\\files\\db.properties.txt";
+                "Técnicas de programação\\trabalhos\\trabalho4\\src\\db\\db.properties.txt";
 
         try (FileInputStream fileInputStream = new FileInputStream(path)) {
             Properties properties = new Properties();

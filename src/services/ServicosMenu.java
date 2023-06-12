@@ -1,7 +1,8 @@
 package services;
 
-import dao.entitiesVO.PessoaVO;
-import dao.entitiesVO.ProfissaoVO;
+import entities.dao.PessoaDAO;
+import entities.dao.ProfissaoDAO;
+import entities.dao.impl.DAOFactory;
 import entities.Pessoa;
 import entities.Profissao;
 import entities.Telefone;
@@ -27,8 +28,8 @@ public abstract class ServicosMenu {
     public static void executar(int opcao) {
         ServicosProfissao servicosProfissao = new ServicosProfissao();
         ServicosPessoa servicosPessoa = new ServicosPessoa();
-        PessoaVO pessoaVO = new PessoaVO();
-        ProfissaoVO profissaoVO = new ProfissaoVO();
+        PessoaDAO pessoaDao = DAOFactory.criarPessoaDao();
+        ProfissaoDAO profissaoDAO = DAOFactory.criarProfissaoDao();
 
         String mensagem;
 
@@ -46,7 +47,7 @@ public abstract class ServicosMenu {
 
                 case 2 -> {
                     // Testado
-                    if (profissaoVO.bancoVazio()) {
+                    if (profissaoDAO.bancoVazio()) {
                         throw new NotDataException("não há registros para serem alterados");
                     }
 
@@ -57,7 +58,7 @@ public abstract class ServicosMenu {
 
                 case 3 -> {
                     // Testada
-                    if (profissaoVO.bancoVazio()) {
+                    if (profissaoDAO.bancoVazio()) {
                         throw new NotDataException("não há registros para serem removidos");
                     }
 
@@ -69,7 +70,7 @@ public abstract class ServicosMenu {
 
                 case 4 -> {
                     // Testado
-                    if (profissaoVO.bancoVazio()) {
+                    if (profissaoDAO.bancoVazio()) {
                         throw new NotDataException("não há registros para serem listados");
                     }
 
@@ -97,7 +98,7 @@ public abstract class ServicosMenu {
                 }
 
                 case 6 -> {
-                    if (pessoaVO.bancoVazio()) {
+                    if (pessoaDao.bancoVazio()) {
                         throw new NotDataException("não há registros para serem alterados");
                     }
 
@@ -108,7 +109,7 @@ public abstract class ServicosMenu {
 
                 case 7 -> {
                     // Testada
-                    if (pessoaVO.bancoVazio()) {
+                    if (pessoaDao.bancoVazio()) {
                         throw new NotDataException("não há registros para serem removidos");
                     }
 
@@ -119,7 +120,7 @@ public abstract class ServicosMenu {
 
                 case 8 -> {
                     // Testado
-                    if (pessoaVO.bancoVazio()) {
+                    if (pessoaDao.bancoVazio()) {
                         throw new NotDataException("não há registros para serem listados");
                     }
 

@@ -1,11 +1,12 @@
 package services;
 
-import dao.entitiesVO.PessoaVO;
-import dao.entitiesVO.ProfissaoVO;
-import dao.entitiesVO.TelefoneVO;
+import entities.dao.ProfissaoDAO;
+import entities.dao.TelefoneDAO;
 import entities.Pessoa;
 import entities.Profissao;
 import entities.Telefone;
+import entities.dao.PessoaDAO;
+import entities.dao.impl.DAOFactory;
 import entities.exceptions.*;
 
 import java.util.ArrayList;
@@ -13,15 +14,15 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ServicosPessoa {
-    private static final PessoaVO pessoaVO = new PessoaVO();
-    private static final ServicosPessoa servicosPessoa = new ServicosPessoa();
-    private static final ServicosTelefone servicosTelefone = new ServicosTelefone();
+    private static final PessoaDAO PESSOA_DAO = DAOFactory.criarPessoaDao();
+    private static final ServicosPessoa SERVICOS_PESSOA = new ServicosPessoa();
+    private static final ServicosTelefone SERVICOS_TELEFONE = new ServicosTelefone();
 
     public Pessoa criarPessoa() {
         // Testado
         Scanner scanner = new Scanner(System.in);
 
-        TelefoneVO telefoneVO = new TelefoneVO();
+        TelefoneDAO telefoneDao = DAOFactory.criarTelefoneDao();
 
         Pessoa novaPessoa;
         Profissao profissao;
@@ -35,15 +36,15 @@ public class ServicosPessoa {
             throw new InvalidLenghtException("o número de caracteres do nome é inválido");
         }
 
-        profissao = servicosPessoa.obterProfissao();
+        profissao = SERVICOS_PESSOA.obterProfissao();
 
         novaPessoa = new Pessoa(nomePessoa, profissao);
 
-        servicosTelefone.criarTelefone(novaPessoa);
+        SERVICOS_TELEFONE.criarTelefone(novaPessoa);
 
-        novaPessoa.setId(pessoaVO.inserirBD(novaPessoa));
+        novaPessoa.setId(PESSOA_DAO.inserir(novaPessoa));
 
-        telefoneVO.inserirBD(novaPessoa.getTelefones(), novaPessoa.getId());
+        telefoneDao.inserir(novaPessoa.getTelefones(), novaPessoa.getId());
 
         return novaPessoa;
     }
@@ -52,14 +53,14 @@ public class ServicosPessoa {
         // Testado
         Scanner scanner = new Scanner(System.in);
 
-        TelefoneVO telefoneVO = new TelefoneVO();
+        TelefoneDAO telefoneDao = DAOFactory.criarTelefoneDao();
 
         Pessoa pessoa;
 
         int opcao;
         String alteracao;
 
-        pessoa = servicosPessoa.obterPessoa();
+        pessoa = SERVICOS_PESSOA.obterPessoa();
 
         System.out.println("\n" + "Escolha uma opção");
         System.out.println("1 - Alterar o nome da pessoa");
@@ -85,7 +86,9 @@ public class ServicosPessoa {
                     throw new InvalidLenghtException("o número de caracteres do nome é inválido");
                 }
 
-                int retorno = pessoaVO.alterarDB(pessoa.getId(), opcao, alteracao);
+                pessoa.setNome(alteracao);
+
+                int retorno = PESSOA_DAO.alterar(pessoa);
 
                 if (retorno == 0) {
                     throw new SqlUpdateException("não foi possível realizer a alteração dos dados");
@@ -95,11 +98,9 @@ public class ServicosPessoa {
             case 2 -> {
                 System.out.print("\n" + "Insira uma nova profissão: ");
 
-                alteracao = Long.toString(servicosPessoa.obterProfissao().getId());
+                pessoa.setProfissao(SERVICOS_PESSOA.obterProfissao());
 
-                pessoaVO.alterarDB(pessoa.getId(), opcao, alteracao);
-
-                int retorno = pessoaVO.alterarDB(pessoa.getId(), opcao, alteracao);
+                int retorno = PESSOA_DAO.alterar(pessoa);
 
                 if (retorno == 0) {
                     throw new SqlUpdateException("não foi possível realizer a alteração dos dados");
@@ -120,12 +121,12 @@ public class ServicosPessoa {
                 }
 
                 switch (opcao) {
-                    case 1 -> servicosTelefone.removerTelefones(pessoa.getId());
+                    case 1 -> SERVICOS_TELEFONE.removerTelefones(pessoa.getId());
 
                     case 2 -> {
                         int quantidadeNumerosAnterior = pessoa.getTelefones().size();
 
-                        servicosTelefone.criarTelefone(pessoa);
+                        SERVICOS_TELEFONE.criarTelefone(pessoa);
 
                         int quantidadeNumerosAtual = pessoa.getTelefones().size();
 
@@ -133,10 +134,10 @@ public class ServicosPessoa {
                             throw new InvalidInputException("são permitidos apenas valores positivos");
                         }
 
-                        telefoneVO.inserirBD(pessoa.getTelefones(), pessoa.getId());
+                        telefoneDao.inserir(pessoa.getTelefones(), pessoa.getId());
                     }
 
-                    case 3 -> servicosTelefone.alterarTelefones(pessoa.getId());
+                    case 3 -> SERVICOS_TELEFONE.alterarTelefones(pessoa.getId());
 
                 }
             }
@@ -145,13 +146,13 @@ public class ServicosPessoa {
 
     public void removerPessoa() {
         // Testado
-        TelefoneVO telefoneVO = new TelefoneVO();
+        TelefoneDAO telefoneDao = DAOFactory.criarTelefoneDao();
 
         Pessoa pessoa = obterPessoa();
 
-        telefoneVO.removerDbTotal(pessoa.getId());
+        telefoneDao.remover(pessoa.getId());
 
-        int retorno = pessoaVO.removerDB(pessoa.getId());
+        int retorno = PESSOA_DAO.remover(pessoa.getId());
 
         if (retorno == 0) {
             throw new SqlDeleteException("não foi possível fazer a exclusão dos dados");
@@ -163,13 +164,13 @@ public class ServicosPessoa {
         List<Pessoa> listPessoa;
         List<Telefone> listTelefone;
 
-        TelefoneVO telefoneVO = new TelefoneVO();
+        TelefoneDAO telefoneDao = DAOFactory.criarTelefoneDao();
 
         String nomePessoa;
         String nomeProfissao;
         String numeros;
 
-        listPessoa = pessoaVO.listarDB();
+        listPessoa = PESSOA_DAO.listarPessoa();
 
         System.out.println("\n" + "Pessoas: ");
         System.out.println("------------------------------" + "\n");
@@ -180,7 +181,7 @@ public class ServicosPessoa {
 
             nomeProfissao = temp.getProfissao().getNome();
 
-            listTelefone = telefoneVO.obterTelefone(temp.getId());
+            listTelefone = telefoneDao.listarTelefone(temp.getId());
 
             for (Telefone temp2 : listTelefone) {
                 numeros += "(" + temp2.getNumero().substring(0, 2) + ")" + temp2.getNumero().substring(2, 7) +
@@ -242,7 +243,7 @@ public class ServicosPessoa {
             throw new InvalidLenghtException("o número de caracteres do nome é inválido");
         }
 
-        listaPessoas = new ArrayList<>(pessoaVO.obterPessoa(nomePessoa));
+        listaPessoas = new ArrayList<>(PESSOA_DAO.pesquisarPessoa(nomePessoa));
 
         if (listaPessoas.size() == 0) {
             throw new TargetNotFoundExecption("não houve nenhuma correspondência");
@@ -259,12 +260,10 @@ public class ServicosPessoa {
 
     private Profissao obterProfissao() {
         // Testado
-        List<Profissao> listaProfissoes;
-
         Scanner scanner = new Scanner(System.in);
 
         ServicosProfissao servicosProfissao = new ServicosProfissao();
-        ProfissaoVO profissaoVO = new ProfissaoVO();
+        ProfissaoDAO profissaoDAO = DAOFactory.criarProfissaoDao();
         Profissao profissao;
 
         long idProfissao;
@@ -278,13 +277,11 @@ public class ServicosPessoa {
             throw new InvalidInputException("valor de id inválido");
         }
 
-        listaProfissoes = profissaoVO.obterProfissaoId(idProfissao);
+        profissao = profissaoDAO.pesquisarProfissaoId(idProfissao);
 
-        if (listaProfissoes.size() == 0) {
+        if (profissao == null) {
             throw new TargetNotFoundExecption("não houve nenhuma correspondência");
         }
-
-        profissao = listaProfissoes.get(0);
 
         return profissao;
     }
@@ -311,7 +308,7 @@ public class ServicosPessoa {
         switch (opcao) {
             case 1 -> pessoa = obterPessoaNome();
 
-            case 2 -> pessoa = servicosPessoa.listarPessoaResumida(pessoaVO.listarDB());
+            case 2 -> pessoa = SERVICOS_PESSOA.listarPessoaResumida(PESSOA_DAO.listarPessoa());
 
             default -> pessoa = null;
         }

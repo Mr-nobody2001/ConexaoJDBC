@@ -1,8 +1,11 @@
-package dao.entitiesVO;
+package entities.dao.impl;
 
+import db.BaseDAO;
+import entities.dao.ProfissaoDAO;
 import entities.Profissao;
 import entities.exceptions.IntegrityConstraintException;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,41 +13,36 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProfissaoVO extends BaseDAO {
-    public void inserirBD(Profissao profissao) {
-        // Testada
-        connection = getConnection();
+public class ProfissaoDAOJDBC extends BaseDAO implements ProfissaoDAO {
+    private final Connection connection;
 
+    public ProfissaoDAOJDBC() {
+        this.connection = getConnection();
+    }
+
+    public void inserir(Profissao profissao) {
+        // Testada
         String sql = "INSERT INTO profissao (nome, descricao) VALUES (?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, profissao.getNome().toUpperCase());
-            preparedStatement.setString(2, profissao.getDescricao().toUpperCase());
+            preparedStatement.setString(1, profissao.getNome().toUpperCase().trim());
+            preparedStatement.setString(2, profissao.getDescricao().toUpperCase().trim());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public Integer alterarDB(long idProfissao, int opcaoAlterar, String alteracao) {
+    public Integer alterar(Profissao profissao) {
         // Testado
-        connection = getConnection();
-
         int retorno = -1;
 
-        String nomeColuna;
-
-        switch (opcaoAlterar) {
-            case 1 -> nomeColuna = "nome";
-            case 2 -> nomeColuna = "descricao";
-            default -> nomeColuna = null;
-        }
-
-        String sql = "UPDATE profissao SET " + nomeColuna + " = ? WHERE id = ?";
+        String sql = "UPDATE profissao SET nome = ?, descricao = ? WHERE id = ?";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, alteracao.toUpperCase());
-            preparedStatement.setLong(2, idProfissao);
+            preparedStatement.setString(1, profissao.getNome().toUpperCase().trim());
+            preparedStatement.setString(2, profissao.getDescricao().toUpperCase().trim());
+            preparedStatement.setLong(3, profissao.getId());
             retorno = preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -53,10 +51,8 @@ public class ProfissaoVO extends BaseDAO {
         return retorno;
     }
 
-    public int removerDB(long idProfissao) {
+    public int remover(long idProfissao) {
         // Testada
-        connection = getConnection();
-
         int retorno;
 
         String sql = "DELETE FROM profissao WHERE id = ?";
@@ -72,10 +68,8 @@ public class ProfissaoVO extends BaseDAO {
         return retorno;
     }
 
-    public List<Profissao> obterProfissaoNome(String nomeProfissao) {
+    public List<Profissao> pesquisarProfissaoNome(String nomeProfissao) {
         // Testado
-        connection = getConnection();
-
         List<Profissao> list = new ArrayList<>();
 
         ResultSet resultSet = null;
@@ -103,15 +97,11 @@ public class ProfissaoVO extends BaseDAO {
         return list;
     }
 
-    public List<Profissao> obterProfissaoId(long idProfissao) {
+    public Profissao pesquisarProfissaoId(long idProfissao) {
         // Testado
-        connection = getConnection();
-
-        List<Profissao> list = new ArrayList<>();
-
         ResultSet resultSet = null;
 
-        Profissao profissao = new Profissao();
+        Profissao profissao = null;
 
         String sql = "SELECT * FROM profissao WHERE id = ?";
 
@@ -119,10 +109,10 @@ public class ProfissaoVO extends BaseDAO {
             preparedStatement.setLong(1, idProfissao);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
+                profissao = new Profissao();
                 profissao.setId(resultSet.getLong("id"));
                 profissao.setNome(resultSet.getString("nome"));
                 profissao.setDescricao(resultSet.getString("descricao"));
-                list.add(profissao);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -130,13 +120,11 @@ public class ProfissaoVO extends BaseDAO {
             fecharResultSet(resultSet);
         }
 
-        return list;
+        return profissao;
     }
 
-    public List<Profissao> listarDB() {
+    public List<Profissao> listarProfissao() {
         // Testado
-        connection = getConnection();
-
         List<Profissao> list;
 
         ResultSet resultSet = null;
@@ -164,25 +152,6 @@ public class ProfissaoVO extends BaseDAO {
     }
 
     public boolean bancoVazio() {
-        // Testado
-        connection = this.getConnection();
-
-        ResultSet resultSet = null;
-
-        String sql = "SELECT * FROM profissao";
-
-        boolean bancoVazio = true;
-
-        try (Statement statement = connection.createStatement();) {
-            resultSet = statement.executeQuery(sql);
-            bancoVazio = !resultSet.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            fecharResultSet(resultSet);
-        }
-
-        return bancoVazio;
+        return this.listarProfissao().size() == 0;
     }
-
 }

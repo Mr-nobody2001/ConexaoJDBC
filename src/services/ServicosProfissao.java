@@ -1,7 +1,8 @@
 package services;
 
-import dao.entitiesVO.ProfissaoVO;
 import entities.Profissao;
+import entities.dao.ProfissaoDAO;
+import entities.dao.impl.DAOFactory;
 import entities.exceptions.*;
 
 import java.util.ArrayList;
@@ -9,8 +10,8 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ServicosProfissao {
-    private static final ServicosProfissao servicosProfissao = new ServicosProfissao();
-    private static final ProfissaoVO profissaoVO = new ProfissaoVO();
+    private static final ServicosProfissao SERVICOS_PROFISSAO = new ServicosProfissao();
+    private static final ProfissaoDAO PROFISSAO_DAO = DAOFactory.criarProfissaoDao();
 
     public Profissao criarProfissao() {
         // Testado
@@ -37,7 +38,7 @@ public class ServicosProfissao {
 
         novaProfissao = new Profissao(nomeProfissao, descricaoProfissao);
 
-        profissaoVO.inserirBD(novaProfissao);
+        PROFISSAO_DAO.inserir(novaProfissao);
 
         return novaProfissao;
     }
@@ -46,13 +47,15 @@ public class ServicosProfissao {
         // Testado
         Scanner scanner = new Scanner(System.in);
 
+        ProfissaoDAO profissaoDAO = DAOFactory.criarProfissaoDao();
+
         int opcao;
         long idProfissao;
         String mensagem, alteracao;
 
         mensagem = "";
 
-        idProfissao = servicosProfissao.obterIdProfissao();
+        idProfissao = SERVICOS_PROFISSAO.obterIdProfissao();
 
         System.out.println("\n" + "Escolha uma opção");
         System.out.println("1 - Alterar o nome da profissão");
@@ -72,6 +75,8 @@ public class ServicosProfissao {
 
         System.out.print("\n" + mensagem);
 
+        Profissao profissao = profissaoDAO.pesquisarProfissaoId(idProfissao);
+
         do {
             alteracao = scanner.nextLine();
         } while (alteracao.equals(""));
@@ -80,7 +85,12 @@ public class ServicosProfissao {
             throw new InvalidLenghtException("o número de caracteres do nome é inválido");
         }
 
-        int retorno = profissaoVO.alterarDB(idProfissao, opcao, alteracao);
+        switch (opcao) {
+            case 1 -> profissao.setNome(alteracao);
+            case 2 -> profissao.setDescricao(alteracao);
+        }
+
+        int retorno = PROFISSAO_DAO.alterar(profissao);
 
         if (retorno == 0) {
             throw new SqlUpdateException("não foi possível realizer a alteração dos dados");
@@ -93,7 +103,7 @@ public class ServicosProfissao {
 
         idProfissao = obterIdProfissao();
 
-        int retorno = profissaoVO.removerDB(idProfissao);
+        int retorno = PROFISSAO_DAO.remover(idProfissao);
 
         if (retorno == 0) {
             throw new SqlDeleteException("não foi possível fazer a exclusão dos dados");
@@ -104,7 +114,7 @@ public class ServicosProfissao {
         // Testado
         List<Profissao> list;
 
-        list = profissaoVO.listarDB();
+        list = PROFISSAO_DAO.listarProfissao();
 
         System.out.println("\n" + "Profissões: ");
         System.out.println("------------------------------" + "\n");
@@ -117,7 +127,7 @@ public class ServicosProfissao {
         // Testado
         List<Profissao> listaProfissoes;
 
-        listaProfissoes = profissaoVO.listarDB();
+        listaProfissoes = PROFISSAO_DAO.listarProfissao();
 
         imprimirProfissaoResumida(listaProfissoes);
     }
@@ -153,10 +163,10 @@ public class ServicosProfissao {
         }
 
         switch (opcao) {
-            case 1 -> idProfissao = servicosProfissao.obterIdProfissaoNome();
+            case 1 -> idProfissao = SERVICOS_PROFISSAO.obterIdProfissaoNome();
 
             case 2 -> {
-                servicosProfissao.listarProfissaoResumida();
+                SERVICOS_PROFISSAO.listarProfissaoResumida();
                 System.out.print("\n" + "Insira o id da profissão que será alterada: ");
                 idProfissao = scanner.nextLong();
             }
@@ -187,7 +197,7 @@ public class ServicosProfissao {
             throw new InvalidLenghtException("o número de caracteres do nome é inválido");
         }
 
-        listaProfissoes = new ArrayList<>(profissaoVO.obterProfissaoNome(nomeProfissao));
+        listaProfissoes = new ArrayList<>(PROFISSAO_DAO.pesquisarProfissaoNome(nomeProfissao));
 
         if (listaProfissoes.size() == 0) {
             throw new TargetNotFoundExecption("não houve nenhuma correspondência");

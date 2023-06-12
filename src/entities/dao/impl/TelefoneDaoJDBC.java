@@ -1,23 +1,29 @@
-package dao.entitiesVO;
+package entities.dao.impl;
 
+import db.BaseDAO;
+import entities.dao.TelefoneDAO;
 import entities.Telefone;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TelefoneVO extends BaseDAO {
-    public void inserirBD(List<Telefone> numeros, long idPessoa) {
-        // Testada
-        connection = getConnection();
+public class TelefoneDaoJDBC extends BaseDAO implements TelefoneDAO {
+    private final Connection CONNECTION;
+    public TelefoneDaoJDBC() {
+        this.CONNECTION = getConnection();
+    }
 
+    public void inserir(List<Telefone> numeros, long idPessoa) {
+        // Testada
         String sql = "INSERT INTO telefone (numero, id_pessoa) VALUES (?, ?)";
 
         for (Telefone numero : numeros) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                preparedStatement.setString(1, numero.getNumero());
+            try (PreparedStatement preparedStatement = CONNECTION.prepareStatement(sql)) {
+                preparedStatement.setString(1, numero.getNumero().trim());
                 preparedStatement.setLong(2, idPessoa);
                 preparedStatement.executeUpdate();
             } catch (SQLException e) {
@@ -26,17 +32,15 @@ public class TelefoneVO extends BaseDAO {
         }
     }
 
-    public int alterarDB(long idTelefone, String alteracao) {
+    public int alterar(Telefone telefone) {
         // Testado
-        connection = getConnection();
-
         int retorno = -1;
 
         String sql = "UPDATE telefone SET numero = ? WHERE id = ?";
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, alteracao);
-            preparedStatement.setLong(2, idTelefone);
+        try (PreparedStatement preparedStatement = CONNECTION.prepareStatement(sql)) {
+            preparedStatement.setString(1, telefone.getNumero().trim());
+            preparedStatement.setLong(2, telefone.getId());
             retorno = preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -45,13 +49,11 @@ public class TelefoneVO extends BaseDAO {
         return retorno;
     }
 
-    public void removerDbTotal(long idPessoa) {
+    public void remover(long idPessoa) {
         // Testada
-        connection = getConnection();
-
         String sql = "DELETE FROM telefone WHERE id_pessoa = ?";
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = CONNECTION.prepareStatement(sql)) {
             preparedStatement.setLong(1, idPessoa);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -59,15 +61,13 @@ public class TelefoneVO extends BaseDAO {
         }
     }
 
-    public int removerDbEspeficico(long idPessoa, long idTelefone) {
+    public int removerTelefoneEspeficico(long idPessoa, long idTelefone) {
         // Testada
-        connection = getConnection();
-
         int retorno = -1;
 
         String sql = "DELETE FROM telefone WHERE id_pessoa = ? AND id = ?";
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = CONNECTION.prepareStatement(sql)) {
             preparedStatement.setLong(1, idPessoa);
             preparedStatement.setLong(2, idTelefone);
             retorno = preparedStatement.executeUpdate();
@@ -78,17 +78,41 @@ public class TelefoneVO extends BaseDAO {
         return retorno;
     }
 
-    public List<Telefone> obterTelefone(long idPessoa) {
+    public Telefone procurarTelefoneId(long idPessoa, long idTelefone) {
         // Testado
-        connection = getConnection();
+        Telefone telefone = null;
 
+        ResultSet resultSet = null;
+
+        String sql = "SELECT * FROM telefone WHERE id_pessoa = ? AND id = ?";
+
+        try (PreparedStatement preparedStatement = CONNECTION.prepareStatement(sql)) {
+            preparedStatement.setLong(1, idPessoa);
+            preparedStatement.setLong(2, idTelefone);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                telefone = new Telefone();
+                telefone.setId(resultSet.getLong("id"));
+                telefone.setNumero(resultSet.getString("numero"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            fecharResultSet(resultSet);
+        }
+
+        return telefone;
+    }
+
+    public List<Telefone> listarTelefone(long idPessoa) {
+        // Testado
         List<Telefone> list = new ArrayList<>();
 
         ResultSet resultSet = null;
 
         String sql = "SELECT * FROM telefone WHERE id_pessoa = ?";
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = CONNECTION.prepareStatement(sql)) {
             preparedStatement.setLong(1, idPessoa);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -107,24 +131,6 @@ public class TelefoneVO extends BaseDAO {
     }
 
     public boolean bancoVazio(long idPessoa) {
-        connection = getConnection();
-
-        ResultSet resultSet = null;
-
-        String sql = "SELECT * FROM telefone WHERE id_pessoa = ?";
-
-        boolean bancoVazio = true;
-
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setLong(1, idPessoa);
-            resultSet = preparedStatement.executeQuery();
-            bancoVazio = !resultSet.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            fecharResultSet(resultSet);
-        }
-
-        return bancoVazio;
+        return this.listarTelefone(idPessoa).size() == 0;
     }
 }

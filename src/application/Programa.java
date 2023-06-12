@@ -1,6 +1,6 @@
 package application;
 
-import dao.entitiesVO.BaseDAO;
+import db.BaseDAO;
 import services.ServicosMenu;
 
 import java.util.InputMismatchException;

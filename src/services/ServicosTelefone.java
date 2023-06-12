@@ -1,8 +1,9 @@
 package services;
 
-import dao.entitiesVO.TelefoneVO;
 import entities.Pessoa;
 import entities.Telefone;
+import entities.dao.TelefoneDAO;
+import entities.dao.impl.DAOFactory;
 import entities.exceptions.InvalidInputException;
 import entities.exceptions.NotDataException;
 import entities.exceptions.SqlDeleteException;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ServicosTelefone {
-    private static final TelefoneVO telefoneVO = new TelefoneVO();
+    private static final TelefoneDAO TELEFONE_DAO = DAOFactory.criarTelefoneDao();
 
     public void criarTelefone(Pessoa pessoa) {
         Scanner scanner = new Scanner(System.in);
@@ -37,6 +38,8 @@ public class ServicosTelefone {
     public void alterarTelefones(long idPessoa) {
         Scanner scanner = new Scanner(System.in);
 
+        TelefoneDAO telefoneDAO = DAOFactory.criarTelefoneDao();
+
         long idTelefone;
         String alteracao;
 
@@ -49,10 +52,14 @@ public class ServicosTelefone {
             throw new InvalidInputException("valor de id inválido");
         }
 
+        Telefone telefone = telefoneDAO.procurarTelefoneId(idPessoa, idTelefone);
+
         System.out.print("\n" + "Insira um novo número de telefone: ");
         alteracao = verificarFormatoTelefone();
 
-        int retorno = telefoneVO.alterarDB(idTelefone, alteracao);
+        telefone.setNumero(alteracao);
+
+        int retorno = TELEFONE_DAO.alterar(telefone);
 
         if (retorno == 0) {
             throw new SqlUpdateException("não foi possível fazer a alteração dos dados");
@@ -62,7 +69,7 @@ public class ServicosTelefone {
     public void removerTelefones(long idPessoa) {
         Scanner scanner = new Scanner(System.in);
 
-        TelefoneVO telefoneVO = new TelefoneVO();
+        TelefoneDAO telefoneDao = DAOFactory.criarTelefoneDao();
 
         long idTelefone;
 
@@ -75,7 +82,7 @@ public class ServicosTelefone {
             throw new InvalidInputException("valor de id inválido");
         }
 
-        int retorno = telefoneVO.removerDbEspeficico(idPessoa, idTelefone);
+        int retorno = telefoneDao.removerTelefoneEspeficico(idPessoa, idTelefone);
 
         if (retorno == 0) {
             throw new SqlDeleteException("não foi possível fazer a exclusão dos dados");
@@ -85,13 +92,13 @@ public class ServicosTelefone {
     public void listarTelefones(long idPessoa) {
         List<Telefone> listaTelefones;
 
-        TelefoneVO telefoneVO = new TelefoneVO();
+        TelefoneDAO telefoneDao = DAOFactory.criarTelefoneDao();
 
-        if (telefoneVO.bancoVazio(idPessoa)) {
+        if (telefoneDao.bancoVazio(idPessoa)) {
             throw new NotDataException("não há registros para serem alterados");
         }
 
-        listaTelefones = telefoneVO.obterTelefone(idPessoa);
+        listaTelefones = telefoneDao.listarTelefone(idPessoa);
 
         System.out.println("\n" + "Telefones: ");
         System.out.println("------------------------------" + "\n");

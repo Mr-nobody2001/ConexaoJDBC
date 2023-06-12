@@ -1,26 +1,29 @@
-package dao.entitiesVO;
+package entities.dao.impl;
 
+import db.BaseDAO;
+import entities.dao.PessoaDAO;
 import entities.Pessoa;
 import entities.exceptions.SqlInsertException;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PessoaVO extends BaseDAO {
-    public long inserirBD(Pessoa pessoa) {
-        // Testada
-        connection = getConnection();
+public class PessoaDAOJDBC extends BaseDAO implements PessoaDAO {
+    private final Connection connection;
 
+    public PessoaDAOJDBC() {
+        this.connection = getConnection();
+    }
+
+    public long inserir(Pessoa pessoa) {
+        // Testada
         ResultSet resultSet = null;
 
         String sql = "INSERT INTO pessoa (nome, id_profissao) VALUES (?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setString(1, pessoa.getNome().toUpperCase());
+            preparedStatement.setString(1, pessoa.getNome().toUpperCase().trim());
             preparedStatement.setLong(2, pessoa.getProfissao().getId());
             preparedStatement.executeUpdate();
             resultSet = preparedStatement.getGeneratedKeys();
@@ -37,28 +40,16 @@ public class PessoaVO extends BaseDAO {
         }
     }
 
-    public int alterarDB(long idPessoa, int opcaoAlterar, String alteracao) {
+    public int alterar(Pessoa pessoa) {
         // Testado
-        connection = getConnection();
-
         int retorno = -1;
-        String nomeColuna = null;
 
-        switch (opcaoAlterar) {
-            case 1 -> nomeColuna = "nome";
-            case 2 -> nomeColuna = "id_profissao";
-        }
-
-        String sql = "UPDATE pessoa SET " + nomeColuna + " = ? WHERE id = ?";
+        String sql = "UPDATE pessoa SET nome = ?, id_profissao = ? WHERE id = ?";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            if (opcaoAlterar == 1) {
-                preparedStatement.setString(1, alteracao.toUpperCase());
-            } else {
-                preparedStatement.setInt(1, Integer.parseInt(alteracao));
-            }
-
-            preparedStatement.setLong(2, idPessoa);
+            preparedStatement.setString(1, pessoa.getNome().toUpperCase().trim());
+            preparedStatement.setLong(2, pessoa.getProfissao().getId());
+            preparedStatement.setLong(3, pessoa.getId());
             retorno = preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -67,10 +58,8 @@ public class PessoaVO extends BaseDAO {
         return retorno;
     }
 
-    public int removerDB(long idPessoa) {
+    public int remover(long idPessoa) {
         // Testada
-        connection = getConnection();
-
         int retorno;
 
         String sql = "DELETE FROM pessoa WHERE id = ?";
@@ -87,21 +76,19 @@ public class PessoaVO extends BaseDAO {
         return retorno;
     }
 
-    public List<Pessoa> obterPessoa(String nomePessoa) {
+    public List<Pessoa> pesquisarPessoa(String nomePessoa) {
         // Testado
-        connection = getConnection();
-
         List<Pessoa> list = new ArrayList<>();
 
         ResultSet resultSet = null;
 
-        ProfissaoVO profissaoVO;
+        ProfissaoDAOJDBC profissaoDAOJDBC;
 
         String sql = "SELECT * FROM pessoa WHERE nome LIKE ? ORDER BY id";
 
         String nomePesquisa = nomePessoa + "%";
 
-        profissaoVO = new ProfissaoVO();
+        profissaoDAOJDBC = new ProfissaoDAOJDBC();
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
             preparedStatement.setString(1, nomePesquisa.toUpperCase());
@@ -110,7 +97,7 @@ public class PessoaVO extends BaseDAO {
                 Pessoa pessoa = new Pessoa();
                 pessoa.setId(resultSet.getLong("id"));
                 pessoa.setNome(resultSet.getString("nome"));
-                pessoa.setProfissao(profissaoVO.obterProfissaoId(resultSet.getInt("id_profissao")).get(0));
+                pessoa.setProfissao(profissaoDAOJDBC.pesquisarProfissaoId(resultSet.getInt("id_profissao")));
                 list.add(pessoa);
             }
         } catch (SQLException e) {
@@ -122,21 +109,19 @@ public class PessoaVO extends BaseDAO {
         return list;
     }
 
-    public List<Pessoa> listarDB() {
+    public List<Pessoa> listarPessoa() {
         // Testado
-        connection = getConnection();
-
         List<Pessoa> list;
 
         ResultSet resultSet = null;
 
-        ProfissaoVO profissaoVO;
+        ProfissaoDAOJDBC profissaoDAOJDBC;
 
         String sql = "SELECT * FROM pessoa ORDER BY nome";
 
         list = new ArrayList<>();
 
-        profissaoVO = new ProfissaoVO();
+        profissaoDAOJDBC = new ProfissaoDAOJDBC();
 
         try (Statement statement = connection.createStatement()) {
             resultSet = statement.executeQuery(sql);
@@ -144,7 +129,7 @@ public class PessoaVO extends BaseDAO {
                 Pessoa pessoa = new Pessoa();
                 pessoa.setId(resultSet.getLong("id"));
                 pessoa.setNome(resultSet.getString("nome"));
-                pessoa.setProfissao(profissaoVO.obterProfissaoId(resultSet.getInt("id_profissao")).get(0));
+                pessoa.setProfissao(profissaoDAOJDBC.pesquisarProfissaoId(resultSet.getInt("id_profissao")));
                 list.add(pessoa);
             }
         } catch (SQLException e) {
@@ -157,25 +142,6 @@ public class PessoaVO extends BaseDAO {
     }
 
     public boolean bancoVazio() {
-        connection = getConnection();
-
-        ResultSet resultSet = null;
-
-        String sql = "SELECT * FROM pessoa";
-
-        boolean bancoVazio;
-
-        bancoVazio = true;
-
-        try (Statement statement = connection.createStatement();) {
-            resultSet = statement.executeQuery(sql);
-            bancoVazio = !resultSet.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            fecharResultSet(resultSet);
-        }
-
-        return bancoVazio;
+       return this.listarPessoa().size() == 0;
     }
 }
